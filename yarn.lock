@@ -773,6 +773,11 @@ lowdb@^1.0.0:
     pify "^3.0.0"
     steno "^0.4.1"
 
+markdown-escape@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/markdown-escape/-/markdown-escape-2.0.0.tgz#44484d30d7845b91575c77fd8898f23a0a6f890c"
+  integrity sha512-Trz4v0+XWlwy68LJIyw3bLbsJiC8XAbRCKF9DbEtZjyndKOGVx6n+wNB0VfoRmY2LKboQLeniap3xrb6LGSJ8A==
+
 mime-db@1.52.0:
   version "1.52.0"
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.52.0.tgz#bbabcdc02859f4987301c856e3387ce5ec43bf70"

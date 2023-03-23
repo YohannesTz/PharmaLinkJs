@@ -12,6 +12,8 @@ bot.use((new LocalSession({ database: 'database.json' })).middleware())
 const adminGroup = process.env.admin_group;
 
 let isUserAsking = false;
+let isUserAddingComment = false;
+let commentQuestionId;
 let chatId;
 
 
@@ -22,12 +24,87 @@ community.
 /ask - to ask a new question
 /about - about the makers`;
 
-bot.start((ctx) => ctx.reply(`Deep link payload: ${ctx.startPayload}`))
-
 bot.start(async (ctx) => {
 
     if (ctx.startPayload) {
-        return ctx.reply("Deeplink.");
+        const questionId = parseInt(ctx.startPayload.split("__")[1]);
+
+        const getQuestion = await prisma.question.findFirst({
+            where: {
+                id: questionId
+            }
+        });
+
+        const getAnswers = await prisma.answer.findMany({
+            where: {
+                questionId
+            },
+            take: 10
+        });
+
+        const content = `**${getQuestion.text} \n\nBy: [${getQuestion.displayName}](tg://user?id=${getQuestion.fromUserId})**`;
+
+        await ctx.reply(
+            content,
+            {
+                parse_mode: "MarkdownV2",
+                reply_markup: {
+                    inline_keyboard: [
+                        [{ text: "add a comment", callback_data: `addComment-${questionId}` }],
+                    ]
+                }
+            }
+        );
+
+        console.log("size: " + getAnswers.length);
+
+        if (getAnswers.length < 5) {
+            for (let i = 0; i < getAnswers.length; i++) {
+                const commentContent = `${getAnswers[i].text}\n\n By [${getAnswers[i].displayName}](tg://user?id=${getAnswers[i].fromUserId})`;
+
+                await ctx.reply(
+                    commentContent,
+                    {
+                        parse_mode: "MarkdownV2",
+                        inline_keyboard: [
+                            [{ text: "👍", callback_data: `thumbsup-${getAnswers[i].id}` }, { "👎": `thumbsdown-${getAnswers[i].id}` }]
+                        ]
+                    }
+                );
+            }
+        } else {
+            for (let j = 0; j < getAnswers.length; j++) {
+                const commentContent = `${getAnswers[j].text}\n\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})`;
+                console.log("index: " + j);
+                if (j == 8) {
+                    console.log("index == 8");
+                    await ctx.reply(
+                        commentContent,
+                        {
+                            parse_mode: "MarkdownV2",
+                            inline_keyboard: [
+                                [{ text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` }, { "👎": `thumbsdown-${getAnswers[j].id}` }],
+                                [{ text: "Load More", callback_data: `loadMore-${questionId}-${j}` }],
+                            ]
+                        }
+                    );
+                } else {
+                    await ctx.reply(
+                        commentContent,
+                        {
+                            parse_mode: "MarkdownV2",
+                            inline_keyboard: [
+                                [{ text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` }, { "👎": `thumbsdown-${getAnswers[j].id}` }]
+                            ]
+                        }
+                    );
+                }
+            }
+        }
+
+        return;
+    } else {
+        console.log("there is no payload...");
     }
 
     const userExists = await prisma.user.findFirst({
@@ -40,6 +117,8 @@ bot.start(async (ctx) => {
         return ctx.reply(`Hi, Welcome back. Its nice to have you back.
         ${welcomeText}`);
     }
+
+    console.log(ctx)
 
     await ctx.reply(`Setting up...`);
 
@@ -63,22 +142,11 @@ bot.start(async (ctx) => {
     }
 });
 
-bot.hears(/^\/start[ =](.+)$/, async (ctx) => {
-    return await ctx.reply("asdfasd fasdf asd f")
-})
-
-bot.command("sth", async (ctx) => {
-    console.log(ctx);
-    await ctx.reply("sdfsdf")
-});
-
 bot.command("ask", async (ctx) => {
     chatId = ctx.chat.id;
     isUserAsking = true;
-    //question_text = ctx.message.text;
     return await ctx.reply("Send me your question, I will forward it to admins on behalf of you");
 });
-
 
 bot.on(message('text'), async (ctx) => {
     if (isUserAsking) {
@@ -120,8 +188,67 @@ bot.on(message('text'), async (ctx) => {
             console.log(error);
             return await ctx.reply("Something was wrong!");
         }
+    } else if (isUserAddingComment) {
+        isUserAddingComment = false;
+
+        try {
+            const comment_text = makeParsable(ctx.message.text);
+
+            await prisma.answer.create({
+                data: {
+                    text: comment_text,
+                    fromUserId: ctx.message.from.id,
+                    userId: ctx.message.from.id,
+                    questionId: parseInt(commentQuestionId),
+                    displayName: ctx.message.from.first_name
+                }
+            });
+
+            const updateAnswerCount = await prisma.question.update({
+                where: {
+                    id: parseInt(commentQuestionId)
+                },
+                data: {
+                    answersCount: {
+                        increment: 1
+                    }
+                }
+            });
+
+            console.log(updateAnswerCount);
+
+            //Update comment count
+            const link = `https://t.me/${process.env.username}?start=question__${updateAnswerCount.id}`
+
+            await ctx.telegram.editMessageReplyMarkup(
+                updateAnswerCount.questionChatId.toString(),
+                updateAnswerCount.questionMessageId.toString(),
+                undefined,
+                {
+                    inline_keyboard: [
+                        [{ text: `Browse Answers 💬 (${updateAnswerCount.answersCount})`, url: link }],
+                    ]
+                }
+            );
+
+            return ctx.reply("Success!");
+        } catch (error) {
+            console.log(error);
+            return ctx.reply("Oops! something was wrong!");
+        }
     }
 })
+
+bot.action(/addComment-[0-9]+/, async (ctx) => {
+    const str = ctx.update.callback_query.data;
+    const questionId = str.replace(/\D/g, '');
+
+    chatId = ctx.chat.id;
+    isUserAddingComment = true;
+    commentQuestionId = questionId;
+
+    return await ctx.reply("send your answer.");
+});
 
 bot.action(/approvequestion-[0-9]+/, async (ctx) => {
     const str = ctx.update.callback_query.data;
@@ -142,24 +269,19 @@ bot.action(/approvequestion-[0-9]+/, async (ctx) => {
     await ctx.answerCbQuery("Success!");
 
     //Send message to original user using the chatId
-    await ctx.telegram.sendMessage(approvedquestion.questionChatId.toString(), "Your Question has been approved and posted! Thank you for your contribution!");
-
-    const payload = { id: approvedquestion.id };
-    const link = `https://t.me/${process.env.username}?start=${encodeURIComponent(JSON.stringify(payload))}`;
+    const link = `https://t.me/${process.env.username}?start=question__${approvedquestion.id}`
 
     //Update markup inline
-    let res = await ctx.editMessageReplyMarkup({
+    await ctx.editMessageReplyMarkup({
         inline_keyboard: [
             [{ text: `Comments (${approvedquestion.answersCount})`, url: link }],
         ]
     });
 
-    console.log(res);
-
     const content = `**${approvedquestion.text} \n\nBy: [${approvedquestion.displayName}](tg://user?id=${approvedquestion.fromUserId})**`;
-
+    console.log(content);
     //send to channel
-    await ctx.telegram.sendMessage(
+    const channelPost = await ctx.telegram.sendMessage(
         process.env.dest_chan,
         content,
         {
@@ -171,6 +293,22 @@ bot.action(/approvequestion-[0-9]+/, async (ctx) => {
             }
         }
     );
+
+    console.log("=================");
+    console.log(channelPost);
+    console.log("=================");
+
+    await prisma.question.update({
+        data: {
+            questionMessageId: channelPost.message_id,
+            questionChatId: channelPost.chat.id
+        },
+        where: {
+            id: approvedquestion.id
+        }
+    })
+
+    await ctx.telegram.sendMessage(approvedquestion.questionChatId.toString(), "Your Question has been approved and posted! Thank you for your contribution!");
 
     //reply to group
     return ctx.reply("Question was approved 👍!");
@@ -209,10 +347,26 @@ bot.action(/declinequestion-[0-9]+/, async (ctx) => {
 
 bot.launch();
 
-function makeParsable(string) {
-    const regex = /["'\\]/g; // regex for double quotes, single quotes, and backslashes
-    const escape = '\\'; // escape character
-    return string.replace(regex, match => escape + match); // replace matches with escape character and match
+function makeParsable(text) {
+    return text
+        .replace(/\_/g, '\\_')
+        .replace(/\*/g, '\\*')
+        .replace(/\[/g, '\\[')
+        .replace(/\]/g, '\\]')
+        .replace(/\(/g, '\\(')
+        .replace(/\)/g, '\\)')
+        .replace(/\~/g, '\\~')
+        .replace(/\`/g, '\\`')
+        .replace(/\>/g, '\\>')
+        .replace(/\#/g, '\\#')
+        .replace(/\+/g, '\\+')
+        .replace(/\-/g, '\\-')
+        .replace(/\=/g, '\\=')
+        .replace(/\|/g, '\\|')
+        .replace(/\{/g, '\\{')
+        .replace(/\}/g, '\\}')
+        .replace(/\./g, '\\.')
+        .replace(/\!/g, '\\!')
 }
 
 console.log("Bot started successfully!");
