@@ -8,7 +8,7 @@
         "chatId": 5395438361,
         "isUserAsking": false,
         "isUserAddingComment": false,
-        "commentQuestionId": "3",
+        "commentQuestionId": -1,
         "commentIndex": 0
       }
     },

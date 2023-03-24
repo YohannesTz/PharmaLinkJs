@@ -56,6 +56,8 @@ bot.start(async (ctx) => {
                 take: 10
             });
 
+            console.log(getQuestion.objectType);
+
             if (getQuestion.objectType == "text") {
                 const content = `**${getQuestion.text} \n\nAt:${makeParsable(new Date(getQuestion.createdAt).toISOString().split('T')[0])}\nBy: [${getQuestion.displayName}](tg://user?id=${getQuestion.fromUserId})**`;
                 console.log(content)
@@ -95,30 +97,18 @@ bot.start(async (ctx) => {
 
             if (getAnswers.length < 5) {
                 for (let i = 0; i < getAnswers.length; i++) {
-                    const commentContent = `${getAnswers[i].text}\n\nAt:${makeParsable(new Date(getAnswers[i].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[i].displayName}](tg://user?id=${getAnswers[i].fromUserId})`;
+                    let commentContent;
+                    let fileId;
 
-                    await ctx.reply(
-                        commentContent,
-                        {
-                            parse_mode: "MarkdownV2",
-                            reply_markup: {
-                                inline_keyboard: [
-                                    [
-                                        { text: "0 👍", callback_data: `thumbsup-${getAnswers[i].id}` },
-                                        { text: "0 👎", callback_data: `thumbsdown-${getAnswers[i].id}` },
-                                        { text: "0 🤔", callback_data: `doubt-${getAnswers[i].id}` }
-                                    ]
-                                ]
-                            }
-                        }
-                    );
-                }
-            } else {
-                for (let j = 0; j < getAnswers.length; j++) {
-                    const commentContent = `${getAnswers[j].text}\n\nAt:${makeParsable(new Date(getAnswers[j].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})`;
-                    if (j == 9) {
-                        console.log("index == 8");
+                    if (getAnswers[i].objectType == "text") {
+                        commentContent = `${getAnswers[i].text}\n\nAt:${makeParsable(new Date(getAnswers[i].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[i].displayName}](tg://user?id=${getAnswers[i].fromUserId})\n${getAnswers[i].likes} likes`;
+                    } else {
+                        commentContent = `At:${makeParsable(new Date(getAnswers[i].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[i].displayName}](tg://user?id=${getAnswers[i].fromUserId})\n${getAnswers[i].likes} likes`;
+                        fileId = getAnswers[i].text;
+                    }
 
+                    if (getAnswers[i].objectType == "text") {
+                        console.log(commentContent);
                         await ctx.reply(
                             commentContent,
                             {
@@ -126,33 +116,123 @@ bot.start(async (ctx) => {
                                 reply_markup: {
                                     inline_keyboard: [
                                         [
-                                            { text: "0 👍", callback_data: `thumbsup-${getAnswers[j].id}` },
-                                            { text: "0 👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
-                                            { text: "0 🤔", callback_data: `doubt-${getAnswers[j].id}` }
-                                        ],
-                                        [
-                                            { text: "Load More", callback_data: `loadMoreComment-${questionId}-${10}` }
+                                            { text: "👍", callback_data: `thumbsup-${getAnswers[i].id}` },
+                                            { text: "👎", callback_data: `thumbsdown-${getAnswers[i].id}` },
+                                            { text: `(${getAnswers[i].doubt}) 🤔`, callback_data: `doubt-${getAnswers[i].id}` }
                                         ]
                                     ]
                                 }
                             }
                         );
                     } else {
-                        await ctx.reply(
-                            commentContent,
+                        await ctx.replyWithVoice(
+                            fileId,
                             {
+                                caption: commentContent,
                                 parse_mode: "MarkdownV2",
                                 reply_markup: {
                                     inline_keyboard: [
                                         [
-                                            { text: "0 👍", callback_data: `thumbsup-${getAnswers[j].id}` },
-                                            { text: "0 👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
-                                            { text: "0 🤔", callback_data: `doubt-${getAnswers[j].id}` }
+                                            { text: "👍", callback_data: `thumbsup-${getAnswers[i].id}` },
+                                            { text: "👎", callback_data: `thumbsdown-${getAnswers[i].id}` },
+                                            { text: `(${getAnswers[i].doubt}) 🤔`, callback_data: `doubt-${getAnswers[i].id}` }
                                         ]
                                     ]
                                 }
                             }
                         );
+                    }
+                }
+            } else {
+                for (let j = 0; j < getAnswers.length; j++) {
+                    let commentContent;
+                    let fileId;
+
+                    if (getAnswers[j].objectType == "text") {
+                        commentContent = `${getAnswers[j].text}\n\nAt:${makeParsable(new Date(getAnswers[j].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})\n${getAnswers[j].likes} likes`;
+                    } else {
+                        commentContent = `At:${makeParsable(new Date(getAnswers[j].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})\n${getAnswers[j].likes} likes`;
+                        fileId = getAnswers[j].text;
+                    }
+
+                    if (j == 9) {
+                        console.log("j == 9 (159)");
+
+                        if (getAnswers[j].objectType == "text") {
+                            await ctx.reply(
+                                commentContent,
+                                {
+                                    parse_mode: "MarkdownV2",
+                                    reply_markup: {
+                                        inline_keyboard: [
+                                            [
+                                                { text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` },
+                                                { text: "👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                                { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
+                                            ],
+                                            [
+                                                { text: "Load More", callback_data: `loadMoreComment-${getAnswers[j].questionId}-${ctx.session.commentIndex}` }
+                                            ]
+                                        ]
+                                    }
+                                }
+                            );
+                        } else {
+                            await ctx.replyWithVoice(
+                                fileId,
+                                {
+                                    caption: commentContent,
+                                    parse_mode: "MarkdownV2",
+                                    reply_markup: {
+                                        inline_keyboard: [
+                                            [
+                                                { text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` },
+                                                { text: "👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                                { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
+                                            ],
+                                            [
+                                                { text: "Load More", callback_data: `loadMoreComment-${getAnswers[j].questionId}-${ctx.session.commentIndex}` }
+                                            ]
+                                        ]
+                                    }
+                                }
+                            );
+                        }
+                    } else {
+                        if (getAnswers[j].objectType == "text") {
+                            await ctx.reply(
+                                commentContent,
+                                {
+                                    parse_mode: "MarkdownV2",
+                                    reply_markup: {
+                                        inline_keyboard: [
+                                            [
+                                                { text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` },
+                                                { text: "👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                                { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
+                                            ]
+                                        ]
+                                    }
+                                }
+                            );
+                        } else {
+                            await ctx.replyWithVoice(
+                                fileId,
+                                {
+                                    caption: commentContent,
+                                    parse_mode: "MarkdownV2",
+                                    reply_markup: {
+                                        inline_keyboard: [
+                                            [
+                                                { text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` },
+                                                { text: "👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                                { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
+                                            ]
+                                        ]
+                                    }
+                                }
+                            );
+                        }
                     }
                 }
             }
@@ -199,13 +279,29 @@ bot.start(async (ctx) => {
 
         console.log(newUser);
 
-        await ctx.reply(`
-        Welcome to PharmaLink!${welcomeText}`);
+        return await ctx.reply(`
+        Welcome to PharmaLink!${welcomeText}`, {
+            reply_markup: {
+                keyboard: [
+                    ['Ask'], ['Help']
+                ]
+            }
+        });
     } catch (error) {
         console.log(error);
-        await ctx.reply("Something was wrong...");
+        return await ctx.reply("Something was wrong...");
     }
 });
+
+
+// Handle button clicks
+bot.hears('ask', async (ctx) => {
+    return await ctx.reply('You clicked Button 1')
+})
+
+bot.hears('help', async (ctx) => {
+    return await ctx.reply('You clicked Button 2')
+})
 
 bot.command("ask", async (ctx) => {
     ctx.session.chatId = ctx.chat.id;
@@ -214,12 +310,7 @@ bot.command("ask", async (ctx) => {
 });
 
 bot.on(message('voice'), async (ctx) => {
-    /* const voice = ctx.message.voice;
-    const fileId = voice.file_id;
-    const fileUrl = `https://api.telegram.org/file/bot/${process.env.token}/${voice.file_path}`
-    return await ctx.replyWithVoice(fileId, {
-        caption: "Your voice is heard!"
-    }); */
+
     if (ctx.session.isUserAsking) {
         ctx.session.isUserAsking = false;
 
@@ -445,7 +536,7 @@ bot.action(/loadMoreComment-[0-9]+-[0-9]+/, async (ctx) => {
 
         if (getAnswers.length < 5) {
             for (let i = 0; i < getAnswers.length; i++) {
-                const commentContent = `${getAnswers[i].text}\n\nAt:${makeParsable(new Date(getAnswers[i].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[i].displayName}](tg://user?id=${getAnswers[i].fromUserId})`;
+                const commentContent = `${getAnswers[i].text}\n\nAt:${makeParsable(new Date(getAnswers[i].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[i].displayName}](tg://user?id=${getAnswers[i].fromUserId})\n${getAnswers[i].likes} likes`;
 
                 await ctx.reply(
                     commentContent,
@@ -454,9 +545,9 @@ bot.action(/loadMoreComment-[0-9]+-[0-9]+/, async (ctx) => {
                         reply_markup: {
                             inline_keyboard: [
                                 [
-                                    { text: "0 👍", callback_data: `thumbsup-${getAnswers[i].id}` },
-                                    { text: "0 👎", callback_data: `thumbsdown-${getAnswers[i].id}` },
-                                    { text: "0 🤔", callback_data: `doubt-${getAnswers[i].id}` }
+                                    { text: "👍", callback_data: `thumbsup-${getAnswers[i].id}` },
+                                    { text: "👎", callback_data: `thumbsdown-${getAnswers[i].id}` },
+                                    { text: `(${getAnswers[i].likes}) 🤔`, callback_data: `doubt-${getAnswers[i].id}` }
                                 ]
                             ]
                         }
@@ -465,44 +556,94 @@ bot.action(/loadMoreComment-[0-9]+-[0-9]+/, async (ctx) => {
             }
         } else {
             for (let j = 0; j < getAnswers.length; j++) {
-                const commentContent = `${getAnswers[j].text}\n\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})`;
-                if (j == 9) {
-                    console.log("index == 8");
+                let commentContent;
+                let fileId;
 
-                    await ctx.reply(
-                        commentContent,
-                        {
-                            parse_mode: "MarkdownV2",
-                            reply_markup: {
-                                inline_keyboard: [
-                                    [
-                                        { text: "0 👍", callback_data: `thumbsup-${getAnswers[j].id}` },
-                                        { text: "0 👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
-                                        { text: "0 🤔", callback_data: `doubt-${getAnswers[j].id}` }
-                                    ],
-                                    [
-                                        { text: "Load More", callback_data: `loadMoreComment-${qId}-${10}` }
-                                    ]
-                                ]
-                            }
-                        }
-                    );
+                if (getAnswers[j].objectType == "text") {
+                    commentContent = `${getAnswers[j].text}\n\nAt:${makeParsable(new Date(getAnswers[j].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})\n${getAnswers[j].likes} likes`;
                 } else {
-                    await ctx.reply(
-                        commentContent,
-                        {
-                            parse_mode: "MarkdownV2",
-                            reply_markup: {
-                                inline_keyboard: [
-                                    [
-                                        { text: "0 👍", callback_data: `thumbsup-${getAnswers[j].id}` },
-                                        { text: "0 👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
-                                        { text: "0 🤔", callback_data: `doubt-${getAnswers[j].id}` }
+                    commentContent = `At:${makeParsable(new Date(getAnswers[j].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})\n${getAnswers[j].likes} likes`;
+                    fileId = getAnswers[j].text;
+                }
+
+                if (j == 9) {
+                    console.log("j == 9 (159)");
+
+                    if (getAnswers[j].objectType == "text") {
+                        await ctx.reply(
+                            commentContent,
+                            {
+                                parse_mode: "MarkdownV2",
+                                reply_markup: {
+                                    inline_keyboard: [
+                                        [
+                                            { text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` },
+                                            { text: "👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                            { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
+                                        ],
+                                        [
+                                            { text: "Load More", callback_data: `loadMoreComment-${getAnswers[j].questionId}-${ctx.session.commentIndex}` }
+                                        ]
                                     ]
-                                ]
+                                }
                             }
-                        }
-                    );
+                        );
+                    } else {
+                        await ctx.replyWithVoice(
+                            fileId,
+                            {
+                                caption: commentContent,
+                                parse_mode: "MarkdownV2",
+                                reply_markup: {
+                                    inline_keyboard: [
+                                        [
+                                            { text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` },
+                                            { text: "👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                            { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
+                                        ],
+                                        [
+                                            { text: "Load More", callback_data: `loadMoreComment-${getAnswers[j].questionId}-${ctx.session.commentIndex}` }
+                                        ]
+                                    ]
+                                }
+                            }
+                        );
+                    }
+                } else {
+                    if (getAnswers[j].objectType == "text") {
+                        await ctx.reply(
+                            commentContent,
+                            {
+                                parse_mode: "MarkdownV2",
+                                reply_markup: {
+                                    inline_keyboard: [
+                                        [
+                                            { text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` },
+                                            { text: "👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                            { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
+                                        ]
+                                    ]
+                                }
+                            }
+                        );
+                    } else {
+                        await ctx.replyWithVoice(
+                            fileId,
+                            {
+                                caption: commentContent,
+                                parse_mode: "MarkdownV2",
+                                reply_markup: {
+                                    inline_keyboard: [
+                                        [
+                                            { text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` },
+                                            { text: "👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                            { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
+                                        ]
+                                    ]
+                                }
+                            }
+                        );
+                    }
                 }
             }
         }
@@ -518,6 +659,57 @@ bot.action(/thumbsup-[0-9]+/, async (ctx) => {
     const string = ctx.update.callback_query.data;
     const commentId = string.replace(/\D/g, '');
 
+    const updateComment = await prisma.answer.update({
+        where: {
+            id: parseInt(commentId)
+        },
+        data: {
+            likes: {
+                increment: 1
+            }
+        }
+    });
+
+    console.log(updateComment);
+
+    let commentContent;
+
+    if (updateComment.objectType == "text") {
+        commentContent = `${updateComment.text}\n\nAt:${makeParsable(new Date(updateComment.createdAt).toISOString().split('T')[0])}\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})\n${updateComment.likes} likes`;
+        await ctx.editMessageText(
+            commentContent,
+            {
+                parse_mode: "MarkdownV2",
+                reply_markup: {
+                    inline_keyboard: [
+                        [
+                            { text: "👍", callback_data: `thumbsup-${updateComment.id}` },
+                            { text: "👎", callback_data: `thumbsdown-${updateComment.id}` },
+                            { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
+                        ]
+                    ]
+                }
+            }
+        );
+    } else {
+        commentContent = `At:${makeParsable(new Date(updateComment.createdAt).toISOString().split('T')[0])}\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})\n${updateComment.likes} likes`;
+        await ctx.editMessageCaption(
+            commentContent,
+            {
+                parse_mode: "MarkdownV2",
+                reply_markup: {
+                    inline_keyboard: [
+                        [
+                            { text: "👍", callback_data: `thumbsup-${updateComment.id}` },
+                            { text: "👎", callback_data: `thumbsdown-${updateComment.id}` },
+                            { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
+                        ]
+                    ]
+                }
+            }
+        );
+    }
+
     return await ctx.answerCbQuery("Successfully liked!");
 });
 
@@ -526,7 +718,96 @@ bot.action(/thumbsdown-[0-9]+/, async (ctx) => {
     const string = ctx.update.callback_query.data;
     const commentId = string.replace(/\D/g, '');
 
+    const comment = await prisma.answer.findFirst({
+        where: {
+            id: parseInt(commentId),
+        }
+    });
+
+    if (comment.likes >= 1) {
+        const updateComment = await prisma.answer.update({
+            where: {
+                id: parseInt(commentId)
+            },
+            data: {
+                likes: {
+                    decrement: 1
+                }
+            }
+        });
+
+        let commentContent;
+
+        if (updateComment.objectType == "text") {
+            commentContent = `${updateComment.text}\n\nAt:${makeParsable(new Date(updateComment.createdAt).toISOString().split('T')[0])}\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})\n${updateComment.likes} likes`;
+            await ctx.editMessageText(
+                commentContent,
+                {
+                    parse_mode: "MarkdownV2",
+                    reply_markup: {
+                        inline_keyboard: [
+                            [
+                                { text: "👍", callback_data: `thumbsup-${updateComment.id}` },
+                                { text: "👎", callback_data: `thumbsdown-${updateComment.id}` },
+                                { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
+                            ]
+                        ]
+                    }
+                }
+            );
+        } else {
+            commentContent = `At:${makeParsable(new Date(updateComment.createdAt).toISOString().split('T')[0])}\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})\n${updateComment.likes} likes`;
+            await ctx.editMessageCaption(
+                commentContent,
+                {
+                    parse_mode: "MarkdownV2",
+                    reply_markup: {
+                        inline_keyboard: [
+                            [
+                                { text: "👍", callback_data: `thumbsup-${updateComment.id}` },
+                                { text: "👎", callback_data: `thumbsdown-${updateComment.id}` },
+                                { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
+                            ]
+                        ]
+                    }
+                }
+            );
+        }
+    }
+
     return await ctx.answerCbQuery("Successfully disliked!");
+});
+
+bot.action(/doubt-[0-9]+/, async (ctx) => {
+    const string = ctx.update.callback_query.data;
+    const commentId = string.replace(/\D/g, '');
+
+    const updateComment = await prisma.answer.update({
+        where: {
+            id: parseInt(commentId)
+        },
+        data: {
+            doubt: {
+                increment: 1
+            }
+        }
+    });
+
+    console.log(updateComment);
+
+    await ctx.editMessageReplyMarkup(
+        {
+            inline_keyboard: [
+                [
+                    { text: "👍", callback_data: `thumbsup-${updateComment.id}` },
+                    { text: "👎", callback_data: `thumbsdown-${updateComment.id}` },
+                    { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
+                ]
+            ]
+        }
+    );
+
+    return await ctx.answerCbQuery("Success!");
 });
 
 bot.action(/approvequestion-[0-9]+/, async (ctx) => {
