@@ -7,7 +7,8 @@ const { message } = require('telegraf/filters');
 const LocalSession = require('telegraf-session-local');
 
 const bot = new Telegraf(process.env.token);
-bot.use((new LocalSession({ database: 'database.json' })).middleware())
+//do not comment. the bot's watch will cause nodemon to restart indefinetly.only use if not using prisma/database
+//bot.use((new LocalSession({ database: 'database.json' })).middleware()) 
 
 const adminGroup = process.env.admin_group;
 
@@ -19,7 +20,7 @@ let chatId;
 
 const welcomeText = `
 Hi welcome to PharmaLink. a bot that allows you to ask questions with your
-community. 
+community. also join if you didn't already https://t.me/testchannelicreated
 /start - to restart the bot
 /ask - to ask a new question
 /about - about the makers`;
@@ -50,7 +51,9 @@ bot.start(async (ctx) => {
                 parse_mode: "MarkdownV2",
                 reply_markup: {
                     inline_keyboard: [
-                        [{ text: "add a comment", callback_data: `addComment-${questionId}` }],
+                        [
+                            { text: "add a comment", callback_data: `addComment-${questionId}` }
+                        ]
                     ]
                 }
             }
@@ -66,9 +69,14 @@ bot.start(async (ctx) => {
                     commentContent,
                     {
                         parse_mode: "MarkdownV2",
-                        inline_keyboard: [
-                            [{ text: "👍", callback_data: `thumbsup-${getAnswers[i].id}` }, { "👎": `thumbsdown-${getAnswers[i].id}` }]
-                        ]
+                        reply_markup: {
+                            inline_keyboard: [
+                                [
+                                    { text: "0 👍", callback_data: `thumbsup-${getAnswers[i].id}` },
+                                    { text: "0 👎", callback_data: `thumbsdown-${getAnswers[i].id}` }
+                                ]
+                            ]
+                        }
                     }
                 );
             }
@@ -76,16 +84,24 @@ bot.start(async (ctx) => {
             for (let j = 0; j < getAnswers.length; j++) {
                 const commentContent = `${getAnswers[j].text}\n\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})`;
                 console.log("index: " + j);
-                if (j == 8) {
+                if (j == 9) {
                     console.log("index == 8");
+
                     await ctx.reply(
                         commentContent,
                         {
                             parse_mode: "MarkdownV2",
-                            inline_keyboard: [
-                                [{ text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` }, { "👎": `thumbsdown-${getAnswers[j].id}` }],
-                                [{ text: "Load More", callback_data: `loadMore-${questionId}-${j}` }],
-                            ]
+                            reply_markup: {
+                                inline_keyboard: [
+                                    [
+                                        { text: "0 👍", callback_data: `thumbsup-${getAnswers[j].id}` },
+                                        { text: "0 👎", callback_data: `thumbsdown-${getAnswers[j].id}` }
+                                    ],
+                                    [
+                                        { text: "Load More", callback_data: `loadMoreComment-${questionId}-${10}` }
+                                    ]
+                                ]
+                            }
                         }
                     );
                 } else {
@@ -93,9 +109,14 @@ bot.start(async (ctx) => {
                         commentContent,
                         {
                             parse_mode: "MarkdownV2",
-                            inline_keyboard: [
-                                [{ text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` }, { "👎": `thumbsdown-${getAnswers[j].id}` }]
-                            ]
+                            reply_markup: {
+                                inline_keyboard: [
+                                    [
+                                        { text: "0 👍", callback_data: `thumbsup-${getAnswers[j].id}` },
+                                        { text: "0 👎", callback_data: `thumbsdown-${getAnswers[j].id}` }
+                                    ]
+                                ]
+                            }
                         }
                     );
                 }
@@ -248,6 +269,29 @@ bot.action(/addComment-[0-9]+/, async (ctx) => {
     commentQuestionId = questionId;
 
     return await ctx.reply("send your answer.");
+});
+
+bot.action(/loadMoreComment-[0-9]+-[0-9]+/, async (ctx) => {
+    const string = ctx.update.callback_query.data;
+    const loadMoreCommentArgs = string.split("-")
+
+    console.log(loadMoreCommentArgs[1] + ", " + loadMoreCommentArgs[2]);
+    return await ctx.reply(loadMoreCommentArgs.toString());
+})
+
+bot.action(/thumbsup-[0-9]+/, async (ctx) => {
+    const string = ctx.update.callback_query.data;
+    const commentId = string.replace(/\D/g, '');
+
+    return await ctx.answerCbQuery("Successfully liked!");
+});
+
+
+bot.action(/thumbsdown-[0-9]+/, async (ctx) => {
+    const string = ctx.update.callback_query.data;
+    const commentId = string.replace(/\D/g, '');
+
+    return await ctx.answerCbQuery("Successfully disliked!");
 });
 
 bot.action(/approvequestion-[0-9]+/, async (ctx) => {

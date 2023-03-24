@@ -11,13 +11,17 @@ datasource db {
 }
 
 model Answer {
-  id          Int      @id @default(autoincrement())
+  id          Int    @id @default(autoincrement())
   text        String
   fromUserId  BigInt
   userId      BigInt
   questionId  Int
   displayName String
-  createdAt   DateTime @default(now())
+  likes       Int
+  deslikes    Int
+  doubt       Int
+
+  createdAt DateTime @default(now())
 }
 
 model Question {
