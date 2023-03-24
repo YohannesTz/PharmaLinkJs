@@ -11,7 +11,7 @@ datasource db {
 }
 
 model Answer {
-  id          Int    @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   text        String
   fromUserId  BigInt
   userId      BigInt
@@ -20,8 +20,8 @@ model Answer {
   likes       Int
   deslikes    Int
   doubt       Int
-
-  createdAt DateTime @default(now())
+  objectType  String
+  createdAt   DateTime @default(now())
 }
 
 model Question {
@@ -33,6 +33,7 @@ model Question {
   questionChatId    BigInt
   questionMessageId BigInt
   displayName       String
+  objectType        String
   createdAt         DateTime @default(now())
 }
 
