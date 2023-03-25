@@ -393,7 +393,7 @@ bot.on(message('voice'), async (ctx) => {
                 undefined,
                 {
                     inline_keyboard: [
-                        [{ text: `Browse Answers 💬 (${updateAnswerCount.answersCount})`, url: link }, { text: `Answer ➕`, url: addanswerLink, resize_keyboard: true },],
+                        [{ text: `Browse Answers 💬 (${updateAnswerCount.answersCount})`, url: link, resize_keyboard: true }, { text: `Answer ➕`, url: addanswerLink, resize_keyboard: true },],
                     ]
                 }
             );
@@ -407,6 +407,7 @@ bot.on(message('voice'), async (ctx) => {
 })
 
 bot.on(message('text'), async (ctx) => {
+    console.log(ctx);
     if (ctx.session.isUserAsking) {
         ctx.session.isUserAsking = false;
 
@@ -489,7 +490,7 @@ bot.on(message('text'), async (ctx) => {
                 undefined,
                 {
                     inline_keyboard: [
-                        [{ text: `Browse Answers 💬 (${updateAnswerCount.answersCount})`, url: link }, { text: `Answer ➕`, url: addanswerLink, resize_keyboard: true },],
+                        [{ text: `Browse Answers 💬 (${updateAnswerCount.answersCount})`, url: link, resize_keyboard: true }, { text: `Answer ➕`, url: addanswerLink, resize_keyboard: true },],
                     ]
                 }
             );
@@ -836,7 +837,7 @@ bot.action(/approvequestion-[0-9]+/, async (ctx) => {
     await ctx.editMessageReplyMarkup({
         inline_keyboard: [
             [
-                { text: `Browse Answers 💬 (${approvedquestion.answersCount})`, url: link },
+                { text: `Browse Answers 💬 (${approvedquestion.answersCount})`, url: link, resize_keyboard: true },
                 { text: `Answer ➕`, url: addanswerLink, resize_keyboard: true },
             ],
         ]
@@ -855,7 +856,7 @@ bot.action(/approvequestion-[0-9]+/, async (ctx) => {
                 reply_markup: {
                     inline_keyboard: [
                         [
-                            { text: `Browse Answers 💬 (${approvedquestion.answersCount})`, url: link },
+                            { text: `Browse Answers 💬 (${approvedquestion.answersCount})`, url: link, resize_keyboard: true },
                             { text: `Answer ➕`, url: addanswerLink, resize_keyboard: true },
                         ],
                     ]
@@ -885,7 +886,7 @@ bot.action(/approvequestion-[0-9]+/, async (ctx) => {
                 reply_markup: {
                     inline_keyboard: [
                         [
-                            { text: `Browse Answers 💬 (${approvedquestion.answersCount})`, url: link },
+                            { text: `Browse Answers 💬 (${approvedquestion.answersCount})`, url: link, resize_keyboard: true},
                             { text: `Answer ➕`, url: addanswerLink, resize_keyboard: true },
                         ],
                     ]

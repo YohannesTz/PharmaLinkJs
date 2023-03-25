@@ -11,54 +11,6 @@
         "commentQuestionId": -1,
         "commentIndex": 0
       }
-    },
-    {
-      "id": "5136484144:5136484144",
-      "data": {
-        "userid": 5136484144,
-        "name": "Somebody Without Anyone",
-        "chatId": 5136484144,
-        "isUserAsking": false,
-        "isUserAddingComment": false,
-        "commentQuestionId": -1,
-        "commentIndex": 20
-      }
-    },
-    {
-      "id": "1830763638:1830763638",
-      "data": {
-        "userid": 1830763638,
-        "name": "Petty sapian",
-        "chatId": 1830763638,
-        "isUserAsking": false,
-        "isUserAddingComment": false,
-        "commentQuestionId": -1,
-        "commentIndex": 0
-      }
-    },
-    {
-      "id": "547482143:547482143",
-      "data": {
-        "userid": 547482143,
-        "name": "σοφία",
-        "chatId": 547482143,
-        "isUserAsking": false,
-        "isUserAddingComment": true,
-        "commentQuestionId": "41",
-        "commentIndex": 0
-      }
-    },
-    {
-      "id": "440997283:440997283",
-      "data": {
-        "userid": 440997283,
-        "name": "Hope",
-        "chatId": 440997283,
-        "isUserAsking": false,
-        "isUserAddingComment": false,
-        "commentQuestionId": -1,
-        "commentIndex": 0
-      }
     }
   ]
 }
