@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -20,8 +20,17 @@ model Answer {
   likes       Int
   deslikes    Int
   doubt       Int
+  caption     String
   objectType  String
   createdAt   DateTime @default(now())
+}
+
+model Action {
+  id         Int      @id @default(autoincrement())
+  answerId   BigInt
+  userId     BigInt
+  actionType String
+  createdAt  DateTime @default(now())
 }
 
 model Question {

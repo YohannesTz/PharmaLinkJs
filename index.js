@@ -116,8 +116,8 @@ bot.start(async (ctx) => {
                                 reply_markup: {
                                     inline_keyboard: [
                                         [
-                                            { text: "👍", callback_data: `thumbsup-${getAnswers[i].id}` },
-                                            { text: "👎", callback_data: `thumbsdown-${getAnswers[i].id}` },
+                                            { text: `(${getAnswers[i].likes}) 👍`, callback_data: `thumbsup-${getAnswers[i].id}` },
+                                            { text: `(${getAnswers[i].deslikes}) 👎`, callback_data: `thumbsdown-${getAnswers[i].id}` },
                                             { text: `(${getAnswers[i].doubt}) 🤔`, callback_data: `doubt-${getAnswers[i].id}` }
                                         ]
                                     ]
@@ -133,8 +133,8 @@ bot.start(async (ctx) => {
                                 reply_markup: {
                                     inline_keyboard: [
                                         [
-                                            { text: "👍", callback_data: `thumbsup-${getAnswers[i].id}` },
-                                            { text: "👎", callback_data: `thumbsdown-${getAnswers[i].id}` },
+                                            { text: `(${getAnswers[i].likes}) 👍`, callback_data: `thumbsup-${getAnswers[i].id}` },
+                                            { text: `(${getAnswers[i].deslikes}) 👎`, callback_data: `thumbsdown-${getAnswers[i].id}` },
                                             { text: `(${getAnswers[i].doubt}) 🤔`, callback_data: `doubt-${getAnswers[i].id}` }
                                         ]
                                     ]
@@ -166,8 +166,8 @@ bot.start(async (ctx) => {
                                     reply_markup: {
                                         inline_keyboard: [
                                             [
-                                                { text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` },
-                                                { text: "👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                                { text: `(${getAnswers[j].likes}) 👍`, callback_data: `thumbsup-${getAnswers[j].id}` },
+                                                { text: `(${getAnswers[j].deslikes}) 👎`, callback_data: `thumbsdown-${getAnswers[j].id}` },
                                                 { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
                                             ],
                                             [
@@ -186,8 +186,8 @@ bot.start(async (ctx) => {
                                     reply_markup: {
                                         inline_keyboard: [
                                             [
-                                                { text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` },
-                                                { text: "👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                                { text: `(${getAnswers[j].likes}) 👍`, callback_data: `thumbsup-${getAnswers[j].id}` },
+                                                { text: `(${getAnswers[j].deslikes})👎`, callback_data: `thumbsdown-${getAnswers[j].id}` },
                                                 { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
                                             ],
                                             [
@@ -207,8 +207,8 @@ bot.start(async (ctx) => {
                                     reply_markup: {
                                         inline_keyboard: [
                                             [
-                                                { text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` },
-                                                { text: "👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                                { text: `(${getAnswers[j].likes}) 👍`, callback_data: `thumbsup-${getAnswers[j].id}` },
+                                                { text: `(${getAnswers[j].deslikes}) 👎`, callback_data: `thumbsdown-${getAnswers[j].id}` },
                                                 { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
                                             ]
                                         ]
@@ -224,8 +224,8 @@ bot.start(async (ctx) => {
                                     reply_markup: {
                                         inline_keyboard: [
                                             [
-                                                { text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` },
-                                                { text: "👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                                { text: `(${getAnswers[j].likes}) 👍`, callback_data: `thumbsup-${getAnswers[j].id}` },
+                                                { text: `(${getAnswers[j].deslikes}) 👎`, callback_data: `thumbsdown-${getAnswers[j].id}` },
                                                 { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
                                             ]
                                         ]
@@ -470,7 +470,8 @@ bot.on(message('text'), async (ctx) => {
                     objectType: "text",
                     likes: 0,
                     deslikes: 0,
-                    doubt: 0
+                    doubt: 0,
+                    caption: ""
                 }
             });
 
@@ -552,8 +553,8 @@ bot.action(/loadMoreComment-[0-9]+-[0-9]+/, async (ctx) => {
                         reply_markup: {
                             inline_keyboard: [
                                 [
-                                    { text: "👍", callback_data: `thumbsup-${getAnswers[i].id}` },
-                                    { text: "👎", callback_data: `thumbsdown-${getAnswers[i].id}` },
+                                    { text: `(${getAnswers[i].likes}) 👍`, callback_data: `thumbsup-${getAnswers[i].id}` },
+                                    { text: `(${getAnswers[i].deslikes}) 👎`, callback_data: `thumbsdown-${getAnswers[i].id}` },
                                     { text: `(${getAnswers[i].likes}) 🤔`, callback_data: `doubt-${getAnswers[i].id}` }
                                 ]
                             ]
@@ -584,8 +585,8 @@ bot.action(/loadMoreComment-[0-9]+-[0-9]+/, async (ctx) => {
                                 reply_markup: {
                                     inline_keyboard: [
                                         [
-                                            { text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` },
-                                            { text: "👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                            { text: `(${getAnswers[j].likes}) 👍`, callback_data: `thumbsup-${getAnswers[j].id}` },
+                                            { text: `(${getAnswers[j].deslikes}) 👎`, callback_data: `thumbsdown-${getAnswers[j].id}` },
                                             { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
                                         ],
                                         [
@@ -604,8 +605,8 @@ bot.action(/loadMoreComment-[0-9]+-[0-9]+/, async (ctx) => {
                                 reply_markup: {
                                     inline_keyboard: [
                                         [
-                                            { text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` },
-                                            { text: "👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                            { text: `(${getAnswers[j].likes}) 👍`, callback_data: `thumbsup-${getAnswers[j].id}` },
+                                            { text: `(${getAnswers[j].deslikes}) 👎`, callback_data: `thumbsdown-${getAnswers[j].id}` },
                                             { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
                                         ],
                                         [
@@ -625,8 +626,8 @@ bot.action(/loadMoreComment-[0-9]+-[0-9]+/, async (ctx) => {
                                 reply_markup: {
                                     inline_keyboard: [
                                         [
-                                            { text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` },
-                                            { text: "👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                            { text: `(${getAnswers[j].likes}) 👍`, callback_data: `thumbsup-${getAnswers[j].id}` },
+                                            { text: `(${getAnswers[j].deslikes}) 👎`, callback_data: `thumbsdown-${getAnswers[j].id}` },
                                             { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
                                         ]
                                     ]
@@ -642,8 +643,8 @@ bot.action(/loadMoreComment-[0-9]+-[0-9]+/, async (ctx) => {
                                 reply_markup: {
                                     inline_keyboard: [
                                         [
-                                            { text: "👍", callback_data: `thumbsup-${getAnswers[j].id}` },
-                                            { text: "👎", callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                            { text: `(${getAnswers[j].likes}) 👍`, callback_data: `thumbsup-${getAnswers[j].id}` },
+                                            { text: `(${getAnswers[j].deslikes}) 👎`, callback_data: `thumbsdown-${getAnswers[j].id}` },
                                             { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
                                         ]
                                     ]
@@ -665,83 +666,41 @@ bot.action(/loadMoreComment-[0-9]+-[0-9]+/, async (ctx) => {
 bot.action(/thumbsup-[0-9]+/, async (ctx) => {
     const string = ctx.update.callback_query.data;
     const commentId = string.replace(/\D/g, '');
+    const actionUserId = ctx.from.id;
 
-    const updateComment = await prisma.answer.update({
+    //check if action exists before doing anything
+    const checkAction = await prisma.action.count({
         where: {
-            id: parseInt(commentId)
-        },
-        data: {
-            likes: {
-                increment: 1
-            }
+            answerId: parseInt(commentId),
+            userId: parseInt(actionUserId)
         }
     });
 
-    console.log(updateComment);
+    console.log(checkAction);
 
-    let commentContent;
-
-    if (updateComment.objectType == "text") {
-        commentContent = `${updateComment.text}\n\nAt:${makeParsable(new Date(updateComment.createdAt).toISOString().split('T')[0])}\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})\n${updateComment.likes} likes`;
-        await ctx.editMessageText(
-            commentContent,
-            {
-                parse_mode: "MarkdownV2",
-                reply_markup: {
-                    inline_keyboard: [
-                        [
-                            { text: "👍", callback_data: `thumbsup-${updateComment.id}` },
-                            { text: "👎", callback_data: `thumbsdown-${updateComment.id}` },
-                            { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
-                        ]
-                    ]
-                }
-            }
-        );
-    } else {
-        commentContent = `At:${makeParsable(new Date(updateComment.createdAt).toISOString().split('T')[0])}\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})\n${updateComment.likes} likes`;
-        await ctx.editMessageCaption(
-            commentContent,
-            {
-                parse_mode: "MarkdownV2",
-                reply_markup: {
-                    inline_keyboard: [
-                        [
-                            { text: "👍", callback_data: `thumbsup-${updateComment.id}` },
-                            { text: "👎", callback_data: `thumbsdown-${updateComment.id}` },
-                            { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
-                        ]
-                    ]
-                }
-            }
-        );
-    }
-
-    return await ctx.answerCbQuery("Successfully liked!");
-});
-
-
-bot.action(/thumbsdown-[0-9]+/, async (ctx) => {
-    const string = ctx.update.callback_query.data;
-    const commentId = string.replace(/\D/g, '');
-
-    const comment = await prisma.answer.findFirst({
-        where: {
-            id: parseInt(commentId),
-        }
-    });
-
-    if (comment.likes >= 1) {
+    if (checkAction <= 0) {
         const updateComment = await prisma.answer.update({
             where: {
                 id: parseInt(commentId)
             },
             data: {
                 likes: {
-                    decrement: 1
+                    increment: 1
                 }
             }
         });
+
+        //console.log(updateComment);
+
+        const insertAction = await prisma.action.create({
+            data: {
+                answerId: parseInt(commentId),
+                userId: parseInt(actionUserId),
+                actionType: "like"
+            }
+        });
+
+        console.log(insertAction);
 
         let commentContent;
 
@@ -754,8 +713,8 @@ bot.action(/thumbsdown-[0-9]+/, async (ctx) => {
                     reply_markup: {
                         inline_keyboard: [
                             [
-                                { text: "👍", callback_data: `thumbsup-${updateComment.id}` },
-                                { text: "👎", callback_data: `thumbsdown-${updateComment.id}` },
+                                { text: `(${updateComment.likes}) 👍`, callback_data: `thumbsup-${updateComment.id}` },
+                                { text: `(${updateComment.deslikes}) 👎`, callback_data: `thumbsdown-${updateComment.id}` },
                                 { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
                             ]
                         ]
@@ -771,8 +730,8 @@ bot.action(/thumbsdown-[0-9]+/, async (ctx) => {
                     reply_markup: {
                         inline_keyboard: [
                             [
-                                { text: "👍", callback_data: `thumbsup-${updateComment.id}` },
-                                { text: "👎", callback_data: `thumbsdown-${updateComment.id}` },
+                                { text: `(${updateComment.likes}) 👍`, callback_data: `thumbsup-${updateComment.id}` },
+                                { text: `(${updateComment.deslikes}) 👎`, callback_data: `thumbsdown-${updateComment.id}` },
                                 { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
                             ]
                         ]
@@ -780,6 +739,95 @@ bot.action(/thumbsdown-[0-9]+/, async (ctx) => {
                 }
             );
         }
+    } else {
+        return await ctx.answerCbQuery("Thanks for the feedback but you have done this before!");
+    }
+
+    return await ctx.answerCbQuery("Successfully liked!");
+});
+
+
+bot.action(/thumbsdown-[0-9]+/, async (ctx) => {
+    const string = ctx.update.callback_query.data;
+    const commentId = string.replace(/\D/g, '');
+    const actionUserId = ctx.from.id;
+
+    const checkAction = await prisma.action.count({
+        where: {
+            answerId: parseInt(commentId),
+            userId: parseInt(actionUserId)
+        }
+    });
+
+    if (checkAction <= 0) {
+        const comment = await prisma.answer.findFirst({
+            where: {
+                id: parseInt(commentId),
+            }
+        });
+
+        if (comment.likes >= 1) {
+            const updateComment = await prisma.answer.update({
+                where: {
+                    id: parseInt(commentId)
+                },
+                data: {
+                    deslikes: {
+                        increment: 1
+                    }
+                }
+            });
+
+            const insertAction = await prisma.action.create({
+                data: {
+                    answerId: parseInt(commentId),
+                    userId: parseInt(actionUserId),
+                    actionType: "like"
+                }
+            });
+
+            console.log(insertAction);
+
+            let commentContent;
+
+            if (updateComment.objectType == "text") {
+                commentContent = `${updateComment.text}\n\nAt:${makeParsable(new Date(updateComment.createdAt).toISOString().split('T')[0])}\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})\n${updateComment.likes} likes`;
+                await ctx.editMessageText(
+                    commentContent,
+                    {
+                        parse_mode: "MarkdownV2",
+                        reply_markup: {
+                            inline_keyboard: [
+                                [
+                                    { text: `(${updateComment.likes}) 👍`, callback_data: `thumbsup-${updateComment.id}` },
+                                    { text: `(${updateComment.deslikes}) 👎`, callback_data: `thumbsdown-${updateComment.id}` },
+                                    { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
+                                ]
+                            ]
+                        }
+                    }
+                );
+            } else {
+                commentContent = `At:${makeParsable(new Date(updateComment.createdAt).toISOString().split('T')[0])}\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})\n${updateComment.likes} likes`;
+                await ctx.editMessageCaption(
+                    commentContent,
+                    {
+                        parse_mode: "MarkdownV2",
+                        reply_markup: {
+                            inline_keyboard: [
+                                [
+                                    { text: `(${updateComment.likes}) 👍`, callback_data: `thumbsup-${updateComment.id}` },
+                                    { text: `(${updateComment.deslikes}) 👎`, callback_data: `thumbsdown-${updateComment.id}` },
+                                    { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
+                                ]
+                            ]
+                        }
+                    }
+                );
+            }
+        }
+    } else {
+        return await ctx.answerCbQuery("Thanks for the feedback but you have done this before!");
     }
 
     return await ctx.answerCbQuery("Successfully disliked!");
@@ -806,8 +854,8 @@ bot.action(/doubt-[0-9]+/, async (ctx) => {
         {
             inline_keyboard: [
                 [
-                    { text: "👍", callback_data: `thumbsup-${updateComment.id}` },
-                    { text: "👎", callback_data: `thumbsdown-${updateComment.id}` },
+                    { text: `(${updateComment.likes}) 👍`, callback_data: `thumbsup-${updateComment.id}` },
+                    { text: `(${updateComment.deslikes}) 👎`, callback_data: `thumbsdown-${updateComment.id}` },
                     { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
                 ]
             ]
@@ -948,12 +996,14 @@ bot.action(/declinequestion-[0-9]+/, async (ctx) => {
     return ctx.reply("Question was declined 👍!");
 });
 
-bot.launch({
+/* bot.launch({
     webhook: {
         domain: "path/to/the/server/url",
         port: process.env.PORT
     }
-});
+}); */
+
+bot.launch();
 
 function makeParsable(text) {
     return text
