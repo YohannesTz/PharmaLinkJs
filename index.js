@@ -303,6 +303,11 @@ bot.hears('help', async (ctx) => {
     return await ctx.reply('You clicked Button 2')
 })
 
+bot.on('inline_query', async (ctx) => {
+    console.log(ctx);
+    return await ctx.reply('sdfsdf');
+});
+
 bot.command("ask", async (ctx) => {
     ctx.session.chatId = ctx.chat.id;
     ctx.session.isUserAsking = true;
@@ -429,6 +434,7 @@ bot.on(message('text'), async (ctx) => {
             console.log(newQuestion);
 
             const text = `**Question ${newQuestion.id} By [${newQuestion.displayName}](tg://user?id=${newQuestion.fromUserId}) at ${makeParsable(new Date(newQuestion.createdAt).toISOString().split('T')[0])}**`
+
             await ctx.forwardMessage(adminGroup, newQuestion.questionMessageId);
             await ctx.telegram.sendMessage(
                 adminGroup,
@@ -886,7 +892,7 @@ bot.action(/approvequestion-[0-9]+/, async (ctx) => {
                 reply_markup: {
                     inline_keyboard: [
                         [
-                            { text: `Browse Answers 💬 (${approvedquestion.answersCount})`, url: link, resize_keyboard: true},
+                            { text: `Browse Answers 💬 (${approvedquestion.answersCount})`, url: link, resize_keyboard: true },
                             { text: `Answer ➕`, url: addanswerLink, resize_keyboard: true },
                         ],
                     ]
@@ -942,7 +948,12 @@ bot.action(/declinequestion-[0-9]+/, async (ctx) => {
     return ctx.reply("Question was declined 👍!");
 });
 
-bot.launch();
+bot.launch({
+    webhook: {
+        domain: "path/to/the/server/url",
+        port: process.env.PORT
+    }
+});
 
 function makeParsable(text) {
     return text
