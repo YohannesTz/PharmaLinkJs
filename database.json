@@ -8,8 +8,10 @@
         "chatId": 5395438361,
         "isUserAsking": false,
         "isUserAddingComment": false,
-        "commentQuestionId": -1,
-        "commentIndex": 0
+        "commentQuestionId": "5",
+        "commentIndex": 0,
+        "isAnon": false,
+        "isCommenterAnon": true
       }
     },
     {
@@ -21,7 +23,9 @@
         "isUserAsking": false,
         "isUserAddingComment": false,
         "commentQuestionId": -1,
-        "commentIndex": 0
+        "commentIndex": 0,
+        "isAnon": false,
+        "isCommenterAnon": false
       }
     }
   ]

@@ -17,7 +17,7 @@ const adminGroup = process.env.admin_group;
 
 
 const welcomeText = `
-Hi welcome to PharmaLink. a bot that allows you to ask questions with your
+Hi welcome to PharmLink. a bot that allows you to ask questions with your
 community. also join if you didn't already https://t.me/testchannelicreated
 /start - to restart the bot
 /ask - to ask a new question
@@ -34,6 +34,8 @@ bot.start(async (ctx) => {
         isUserAddingComment: false, // flag if user is adding comment
         commentQuestionId: -1, // comment request question id
         commentIndex: 0, // index for Browse Answers 💬
+        isAnon: false, //user choice about being anonymus
+        isCommenterAnon: false // again... user choice
     }
 
     if (ctx.startPayload) {
@@ -59,7 +61,12 @@ bot.start(async (ctx) => {
             console.log(getQuestion.objectType);
 
             if (getQuestion.objectType == "text") {
-                const content = `**${getQuestion.text} \n\nAt:${makeParsable(new Date(getQuestion.createdAt).toISOString().split('T')[0])}\nBy: [${getQuestion.displayName}](tg://user?id=${getQuestion.fromUserId})**`;
+                let content;
+                if (getQuestion.isAnon) {
+                    content = `**${getQuestion.text} \n\nAt:${makeParsable(new Date(getQuestion.createdAt).toISOString().split('T')[0])}\nBy: Anonymous**`;
+                } else {
+                    content = `**${getQuestion.text} \n\nAt:${makeParsable(new Date(getQuestion.createdAt).toISOString().split('T')[0])}\nBy: [${getQuestion.displayName}](tg://user?id=${getQuestion.fromUserId})**`;
+                }
                 console.log(content)
                 await ctx.reply(
                     content,
@@ -75,7 +82,12 @@ bot.start(async (ctx) => {
                     }
                 );
             } else {
-                const content = `**By: [${getQuestion.displayName}](tg://user?id=${getQuestion.fromUserId})**`;
+                let content;
+                if (getQuestion.isAnon) {
+                    content = `**By: Anonymous**`;
+                } else {
+                    content = `**By: [${getQuestion.displayName}](tg://user?id=${getQuestion.fromUserId})**`;
+                }
                 const fileId = getQuestion.text;
                 await ctx.replyWithVoice(
                     fileId,
@@ -101,9 +113,18 @@ bot.start(async (ctx) => {
                     let fileId;
 
                     if (getAnswers[i].objectType == "text") {
-                        commentContent = `${getAnswers[i].text}\n\nAt:${makeParsable(new Date(getAnswers[i].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[i].displayName}](tg://user?id=${getAnswers[i].fromUserId})\n${getAnswers[i].likes} likes`;
+                        if (getAnswers[i].isAnon) {
+                            commentContent = `${getAnswers[i].text}\n\nAt:${makeParsable(new Date(getAnswers[i].createdAt).toISOString().split('T')[0])}\nBy Anonymous`;
+                        } else {
+                            commentContent = `${getAnswers[i].text}\n\nAt:${makeParsable(new Date(getAnswers[i].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[i].displayName}](tg://user?id=${getAnswers[i].fromUserId})`;
+                        }
                     } else {
-                        commentContent = `At:${makeParsable(new Date(getAnswers[i].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[i].displayName}](tg://user?id=${getAnswers[i].fromUserId})\n${getAnswers[i].likes} likes`;
+                        if (getAnswers[i].isAnon) {
+                            commentContent = `By Anonymous`;
+                        } else {
+                            commentContent = `By [${getAnswers[i].displayName}](tg://user?id=${getAnswers[i].fromUserId})`;
+                        }
+                        
                         fileId = getAnswers[i].text;
                     }
 
@@ -149,9 +170,17 @@ bot.start(async (ctx) => {
                     let fileId;
 
                     if (getAnswers[j].objectType == "text") {
-                        commentContent = `${getAnswers[j].text}\n\nAt:${makeParsable(new Date(getAnswers[j].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})\n${getAnswers[j].likes} likes`;
+                        if (getAnswers[j].isAnon) {
+                            commentContent = `${getAnswers[j].text}\n\nAt:${makeParsable(new Date(getAnswers[j].createdAt).toISOString().split('T')[0])}\nBy Anonymous`;
+                        } else {
+                            commentContent = `${getAnswers[j].text}\n\nAt:${makeParsable(new Date(getAnswers[j].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})`;
+                        }
                     } else {
-                        commentContent = `At:${makeParsable(new Date(getAnswers[j].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})\n${getAnswers[j].likes} likes`;
+                        if (getAnswers[j].isAnon) {
+                            commentContent = `By Anonymous`;
+                        } else {
+                            commentContent = `By [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})`;
+                        }
                         fileId = getAnswers[j].text;
                     }
 
@@ -310,16 +339,22 @@ bot.on('inline_query', async (ctx) => {
 
 bot.command("ask", async (ctx) => {
     ctx.session.chatId = ctx.chat.id;
-    ctx.session.isUserAsking = true;
-    return await ctx.reply("Send me your question as voice or text, I will forward it to admins on behalf of you");
+    //ctx.session.isUserAsking = true;
+    //return await ctx.reply("Send me your question as voice or text, I will forward it to admins on behalf of you");
+    return await ctx.reply("Do you want to stay anonymus?", {
+        reply_markup: {
+            inline_keyboard: [
+                [{ "text": "Yes", callback_data: "anonymus-poster" }, { "text": "No", callback_data: "public-poster" }]
+            ]
+        }
+    });
 });
 
 bot.on(message('voice'), async (ctx) => {
 
     if (ctx.session.isUserAsking) {
-        ctx.session.isUserAsking = false;
-
         const fileId = ctx.message.voice.file_id;
+        ctx.session.isUserAsking = false;
 
         try {
             const newQuestion = await prisma.question.create({
@@ -331,12 +366,20 @@ bot.on(message('voice'), async (ctx) => {
                     questionChatId: ctx.session.chatId,
                     questionMessageId: ctx.message.message_id,
                     displayName: ctx.message.from.first_name,
+                    isAnon: ctx.session.isAnon,
                     objectType: "voice"
                 }
             });
 
             console.log(newQuestion);
-            const text = `**Question ${newQuestion.id} By [${newQuestion.displayName}](tg://user?id=${newQuestion.fromUserId}) at ${makeParsable(new Date(newQuestion.createdAt).toISOString().split('T')[0])}**`
+            let text;
+
+            if (ctx.session.isAnon) {
+                text = `**Question ${newQuestion.id} By Anonymous**`
+            } else {
+                text = `**Question ${newQuestion.id} By [${newQuestion.displayName}](tg://user?id=${newQuestion.fromUserId})**`
+            }
+
             await ctx.forwardMessage(adminGroup, newQuestion.questionMessageId);
 
             await ctx.telegram.sendMessage(
@@ -372,6 +415,7 @@ bot.on(message('voice'), async (ctx) => {
                     objectType: "voice",
                     likes: 0,
                     deslikes: 0,
+                    isAnon: ctx.session.isCommenterAnon,
                     doubt: 0
                 }
             });
@@ -409,7 +453,7 @@ bot.on(message('voice'), async (ctx) => {
             return ctx.reply("Oops! something was wrong!");
         }
     }
-})
+});
 
 bot.on(message('text'), async (ctx) => {
     console.log(ctx);
@@ -427,13 +471,19 @@ bot.on(message('text'), async (ctx) => {
                     questionChatId: ctx.session.chatId,
                     questionMessageId: ctx.message.message_id,
                     displayName: ctx.message.from.first_name,
+                    isAnon: ctx.session.isAnon,
                     objectType: "text"
                 }
             });
 
             console.log(newQuestion);
+            let text;
 
-            const text = `**Question ${newQuestion.id} By [${newQuestion.displayName}](tg://user?id=${newQuestion.fromUserId}) at ${makeParsable(new Date(newQuestion.createdAt).toISOString().split('T')[0])}**`
+            if (ctx.session.isAnon) {
+                text = `**Question ${newQuestion.id} By Anonymous\nat ${makeParsable(new Date(newQuestion.createdAt).toISOString().split('T')[0])}**`
+            } else {
+                text = `**Question ${newQuestion.id} By [${newQuestion.displayName}](tg://user?id=${newQuestion.fromUserId})**`
+            }
 
             await ctx.forwardMessage(adminGroup, newQuestion.questionMessageId);
             await ctx.telegram.sendMessage(
@@ -471,6 +521,7 @@ bot.on(message('text'), async (ctx) => {
                     likes: 0,
                     deslikes: 0,
                     doubt: 0,
+                    isAnon: ctx.session.isCommenterAnon,
                     caption: ""
                 }
             });
@@ -510,15 +561,50 @@ bot.on(message('text'), async (ctx) => {
     }
 })
 
+bot.action("anonymus-poster", async (ctx) => {
+    ctx.session.isAnon = true;
+    await ctx.answerCbQuery("We respect your choice!");
+    ctx.session.isUserAsking = true;
+    return await ctx.reply("Send me your question as voice or text, I will forward it to admins on behalf of you");
+});
+
+bot.action("public-poster", async (ctx) => {
+    ctx.session.isAnon = false;
+    await ctx.answerCbQuery("We respect your choice!");
+    ctx.session.isUserAsking = true;
+    return await ctx.reply("Send me your question as voice or text, I will forward it to admins on behalf of you");
+});
+
 bot.action(/addComment-[0-9]+/, async (ctx) => {
     const str = ctx.update.callback_query.data;
     const questionId = str.replace(/\D/g, '');
 
     ctx.session.chatId = ctx.chat.id;
     ctx.session.commentQuestionId = questionId;
-    ctx.session.isUserAddingComment = true;
+    //ctx.session.isUserAddingComment = true;
+    //return await ctx.reply("send your answer as a voice or text.");
+    return await ctx.reply("Do you want to stay anonymus?", {
+        reply_markup: {
+            inline_keyboard: [
+                [{ "text": "Yes", callback_data: "anonymus-commenter" }, { "text": "No", callback_data: "public-commenter" }]
+            ]
+        }
+    });
+});
 
-    return await ctx.reply("send your answer as a voice or text.");
+bot.action("anonymus-commenter", async (ctx) => {
+    ctx.session.isCommenterAnon = true;
+    await ctx.answerCbQuery("We respect your choice!");
+    ctx.session.isUserAddingComment = true;
+    return await ctx.reply("Send me your Answer as voice or text");
+})
+
+bot.action("public-commenter", async (ctx) => {
+    ctx.session.isCommenterAnon = false;
+    
+    await ctx.answerCbQuery("We respect your choice!");
+    ctx.session.isUserAddingComment = true;
+    return await ctx.reply("Send me your Answer as voice or text");
 });
 
 bot.action(/loadMoreComment-[0-9]+-[0-9]+/, async (ctx) => {
@@ -544,7 +630,12 @@ bot.action(/loadMoreComment-[0-9]+-[0-9]+/, async (ctx) => {
 
         if (getAnswers.length < 5) {
             for (let i = 0; i < getAnswers.length; i++) {
-                const commentContent = `${getAnswers[i].text}\n\nAt:${makeParsable(new Date(getAnswers[i].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[i].displayName}](tg://user?id=${getAnswers[i].fromUserId})\n${getAnswers[i].likes} likes`;
+                let commentContent;
+                if (getAnswers[i].isAnon) {
+                    commentContent = `${getAnswers[i].text}\n\nAt:${makeParsable(new Date(getAnswers[i].createdAt).toISOString().split('T')[0])}\nBy Anonymous`;
+                } else {
+                    commentContent = `${getAnswers[i].text}\n\nAt:${makeParsable(new Date(getAnswers[i].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[i].displayName}](tg://user?id=${getAnswers[i].fromUserId})`;
+                }
 
                 await ctx.reply(
                     commentContent,
@@ -568,9 +659,9 @@ bot.action(/loadMoreComment-[0-9]+-[0-9]+/, async (ctx) => {
                 let fileId;
 
                 if (getAnswers[j].objectType == "text") {
-                    commentContent = `${getAnswers[j].text}\n\nAt:${makeParsable(new Date(getAnswers[j].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})\n${getAnswers[j].likes} likes`;
+                    commentContent = `${getAnswers[j].text}\n\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})`;
                 } else {
-                    commentContent = `At:${makeParsable(new Date(getAnswers[j].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})\n${getAnswers[j].likes} likes`;
+                    commentContent = `By [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})`;
                     fileId = getAnswers[j].text;
                 }
 
@@ -705,7 +796,11 @@ bot.action(/thumbsup-[0-9]+/, async (ctx) => {
         let commentContent;
 
         if (updateComment.objectType == "text") {
-            commentContent = `${updateComment.text}\n\nAt:${makeParsable(new Date(updateComment.createdAt).toISOString().split('T')[0])}\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})\n${updateComment.likes} likes`;
+            if (updateComment.isAnon) {
+                commentContent = `${updateComment.text}\n\nBy Anonymous`;
+            } else {
+                commentContent = `\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})\n`;
+            }
             await ctx.editMessageText(
                 commentContent,
                 {
@@ -722,7 +817,11 @@ bot.action(/thumbsup-[0-9]+/, async (ctx) => {
                 }
             );
         } else {
-            commentContent = `At:${makeParsable(new Date(updateComment.createdAt).toISOString().split('T')[0])}\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})\n${updateComment.likes} likes`;
+            if (updateComment.isAnon) {
+                commentContent = `\nBy Anonymous`;
+            } else {
+                commentContent = `\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})`;
+            }
             await ctx.editMessageCaption(
                 commentContent,
                 {
@@ -791,7 +890,11 @@ bot.action(/thumbsdown-[0-9]+/, async (ctx) => {
             let commentContent;
 
             if (updateComment.objectType == "text") {
-                commentContent = `${updateComment.text}\n\nAt:${makeParsable(new Date(updateComment.createdAt).toISOString().split('T')[0])}\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})\n${updateComment.likes} likes`;
+                if (updateComment.isAnon) {
+                    commentContent = `${updateComment.text}\n\nAt:${makeParsable(new Date(updateComment.createdAt).toISOString().split('T')[0])}\nBy Anonymous`;
+                } else {
+                    commentContent = `${updateComment.text}\n\nAt:${makeParsable(new Date(updateComment.createdAt).toISOString().split('T')[0])}\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})`;
+                }
                 await ctx.editMessageText(
                     commentContent,
                     {
@@ -808,7 +911,11 @@ bot.action(/thumbsdown-[0-9]+/, async (ctx) => {
                     }
                 );
             } else {
-                commentContent = `At:${makeParsable(new Date(updateComment.createdAt).toISOString().split('T')[0])}\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})\n${updateComment.likes} likes`;
+                if (updateComment.isAnon) {
+                    commentContent = `\nBy Anonymous`;
+                } else {
+                    commentContent = `\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})`;
+                }
                 await ctx.editMessageCaption(
                     commentContent,
                     {
@@ -836,31 +943,51 @@ bot.action(/thumbsdown-[0-9]+/, async (ctx) => {
 bot.action(/doubt-[0-9]+/, async (ctx) => {
     const string = ctx.update.callback_query.data;
     const commentId = string.replace(/\D/g, '');
+    const actionUserId = ctx.from.id;
 
-    const updateComment = await prisma.answer.update({
+    const checkAction = await prisma.action.count({
         where: {
-            id: parseInt(commentId)
-        },
-        data: {
-            doubt: {
-                increment: 1
-            }
+            answerId: parseInt(commentId),
+            userId: parseInt(actionUserId)
         }
     });
 
-    console.log(updateComment);
+    if (checkAction <= 0) {
+        const updateComment = await prisma.answer.update({
+            where: {
+                id: parseInt(commentId)
+            },
+            data: {
+                doubt: {
+                    increment: 1
+                }
+            }
+        });
 
-    await ctx.editMessageReplyMarkup(
-        {
-            inline_keyboard: [
-                [
-                    { text: `(${updateComment.likes}) 👍`, callback_data: `thumbsup-${updateComment.id}` },
-                    { text: `(${updateComment.deslikes}) 👎`, callback_data: `thumbsdown-${updateComment.id}` },
-                    { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
+        const insertAction = await prisma.action.create({
+            data: {
+                answerId: parseInt(commentId),
+                userId: parseInt(actionUserId),
+                actionType: "doubt"
+            }
+        });
+
+        console.log(insertAction);
+
+        await ctx.editMessageReplyMarkup(
+            {
+                inline_keyboard: [
+                    [
+                        { text: `(${updateComment.likes}) 👍`, callback_data: `thumbsup-${updateComment.id}` },
+                        { text: `(${updateComment.deslikes}) 👎`, callback_data: `thumbsdown-${updateComment.id}` },
+                        { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
+                    ]
                 ]
-            ]
-        }
-    );
+            }
+        );
+    } else {
+        return await ctx.answerCbQuery("Thanks for the feedback but you have done this before!");
+    }
 
     return await ctx.answerCbQuery("Success!");
 });
@@ -900,8 +1027,13 @@ bot.action(/approvequestion-[0-9]+/, async (ctx) => {
 
     //send to channel after checking if the object is voice or text
     if (approvedquestion.objectType == "text") {
-        const content = `**${approvedquestion.text} \n\nBy: [${approvedquestion.displayName}](tg://user?id=${approvedquestion.fromUserId})**`;
-        console.log(content);
+        let content;
+
+        if (approvedquestion.isAnon) {
+            content = `**${approvedquestion.text} \n\nBy: Anonymous**`;
+        } else {
+            content = `**${approvedquestion.text} \n\nBy: [${approvedquestion.displayName}](tg://user?id=${approvedquestion.fromUserId})**`;
+        }
         let channelPost = await ctx.telegram.sendMessage(
             process.env.dest_chan,
             content,
@@ -928,7 +1060,14 @@ bot.action(/approvequestion-[0-9]+/, async (ctx) => {
             }
         })
     } else {
-        const content = `**By: [${approvedquestion.displayName}](tg://user?id=${approvedquestion.fromUserId})**`;
+        let content;
+
+        if (approvedquestion.isAnon) {
+            content = `**By: Anonymous**`;
+        } else {
+            content = `**By: [${approvedquestion.displayName}](tg://user?id=${approvedquestion.fromUserId})**`;
+        }
+
         console.log(content);
 
         let channelPost = await ctx.telegram.sendVoice(

@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -22,6 +22,7 @@ model Answer {
   doubt       Int
   caption     String
   objectType  String
+  isAnon      Boolean
   createdAt   DateTime @default(now())
 }
 
@@ -43,6 +44,7 @@ model Question {
   questionMessageId BigInt
   displayName       String
   objectType        String
+  isAnon            Boolean
   createdAt         DateTime @default(now())
 }
 
