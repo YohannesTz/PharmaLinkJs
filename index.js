@@ -455,6 +455,111 @@ bot.on(message('voice'), async (ctx) => {
     }
 });
 
+bot.on(message('photo'), async (ctx) => {
+
+    if (ctx.session.isUserAsking) {
+        const fileId = ctx.message.voice.file_id;
+        ctx.session.isUserAsking = false;
+
+        try {
+            const newQuestion = await prisma.question.create({
+                data: {
+                    text: fileId,
+                    isApproved: false,
+                    fromUserId: ctx.message.from.id,
+                    answersCount: 0,
+                    questionChatId: ctx.session.chatId,
+                    questionMessageId: ctx.message.message_id,
+                    displayName: ctx.message.from.first_name,
+                    isAnon: ctx.session.isAnon,
+                    objectType: "voice"
+                }
+            });
+
+            console.log(newQuestion);
+            let text;
+
+            if (ctx.session.isAnon) {
+                text = `**Question ${newQuestion.id} By Anonymous**`
+            } else {
+                text = `**Question ${newQuestion.id} By [${newQuestion.displayName}](tg://user?id=${newQuestion.fromUserId})**`
+            }
+
+            await ctx.forwardMessage(adminGroup, newQuestion.questionMessageId);
+
+            await ctx.telegram.sendMessage(
+                adminGroup,
+                text,
+                {
+                    parse_mode: "MarkdownV2",
+                    reply_markup: {
+                        inline_keyboard: [
+                            [{ text: "Approve", callback_data: `approvequestion-${newQuestion.id}` }, { text: "Decline", callback_data: `declinequestion-${newQuestion.id}` }],
+                        ]
+                    }
+                }
+            );
+
+            return await ctx.sendMessage("Your question has been sent for review! You will be notified when it is approved or rejected.");
+        } catch (error) {
+            console.log(error);
+            return await ctx.reply("Something was wrong!");
+        }
+    } else if (ctx.session.isUserAddingComment) {
+        ctx.session.isUserAddingComment = false;
+        const fileId = ctx.message.voice.file_id;
+
+        try {
+            await prisma.answer.create({
+                data: {
+                    text: fileId,
+                    fromUserId: ctx.message.from.id,
+                    userId: ctx.message.from.id,
+                    questionId: parseInt(ctx.session.commentQuestionId),
+                    displayName: ctx.message.from.first_name,
+                    objectType: "voice",
+                    likes: 0,
+                    deslikes: 0,
+                    isAnon: ctx.session.isCommenterAnon,
+                    doubt: 0
+                }
+            });
+
+            const updateAnswerCount = await prisma.question.update({
+                where: {
+                    id: parseInt(ctx.session.commentQuestionId)
+                },
+                data: {
+                    answersCount: {
+                        increment: 1
+                    }
+                }
+            });
+
+            console.log(updateAnswerCount);
+
+            //Update comment count
+            const link = `https://t.me/${process.env.username}?start=question__${updateAnswerCount.id}`
+            const addanswerLink = `https://t.me/${process.env.username}?start=addanswer__${updateAnswerCount.id}`
+            await ctx.telegram.editMessageReplyMarkup(
+                updateAnswerCount.questionChatId.toString(),
+                updateAnswerCount.questionMessageId.toString(),
+                undefined,
+                {
+                    inline_keyboard: [
+                        [{ text: `Browse Answers 💬 (${updateAnswerCount.answersCount})`, url: link, resize_keyboard: true }, { text: `Answer ➕`, url: addanswerLink, resize_keyboard: true },],
+                    ]
+                }
+            );
+
+            return ctx.reply("Success!");
+        } catch (error) {
+            console.log(error);
+            return ctx.reply("Oops! something was wrong!");
+        }
+    }
+})
+
 bot.on(message('text'), async (ctx) => {
     console.log(ctx);
     if (ctx.session.isUserAsking) {
