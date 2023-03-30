@@ -39,8 +39,6 @@ bot.start(async (ctx) => {
     }
 
     if (ctx.startPayload) {
-        console.log(ctx.startPayload);
-        console.log(ctx.startPayload.includes("addanswer"))
         if (ctx.startPayload.includes("question")) {
             console.log("Starting question...");
             const questionId = parseInt(ctx.startPayload.split("__")[1]);
@@ -63,9 +61,9 @@ bot.start(async (ctx) => {
             if (getQuestion.objectType == "text") {
                 let content;
                 if (getQuestion.isAnon) {
-                    content = `**${getQuestion.text} \n\nAt:${makeParsable(new Date(getQuestion.createdAt).toISOString().split('T')[0])}\nBy: Anonymous**`;
+                    content = `**${getQuestion.text} \n\nBy: Anonymous**`;
                 } else {
-                    content = `**${getQuestion.text} \n\nAt:${makeParsable(new Date(getQuestion.createdAt).toISOString().split('T')[0])}\nBy: [${getQuestion.displayName}](tg://user?id=${getQuestion.fromUserId})**`;
+                    content = `**${getQuestion.text} \n\nBy: [${getQuestion.displayName}](tg://user?id=${getQuestion.fromUserId})**`;
                 }
                 console.log(content)
                 await ctx.reply(
@@ -76,6 +74,28 @@ bot.start(async (ctx) => {
                             inline_keyboard: [
                                 [
                                     { text: "add an Answer 💬", callback_data: `addComment-${questionId}` }
+                                ]
+                            ]
+                        }
+                    }
+                );
+            } else if (getQuestion.objectType == "photo") {
+                let content;
+                if (getQuestion.isAnon) {
+                    content = `**${getQuestion.caption}\n\nBy: Anonymous**`;
+                } else {
+                    content = `**${getQuestion.caption}\n\nBy: [${getQuestion.displayName}](tg://user?id=${getQuestion.fromUserId})**`;
+                }
+                const fileId = getQuestion.text;
+                await ctx.replyWithPhoto(
+                    fileId,
+                    {
+                        caption: content,
+                        parse_mode: "MarkdownV2",
+                        reply_markup: {
+                            inline_keyboard: [
+                                [
+                                    { text: "add a comment", callback_data: `addComment-${questionId}` }
                                 ]
                             ]
                         }
@@ -114,17 +134,24 @@ bot.start(async (ctx) => {
 
                     if (getAnswers[i].objectType == "text") {
                         if (getAnswers[i].isAnon) {
-                            commentContent = `${getAnswers[i].text}\n\nAt:${makeParsable(new Date(getAnswers[i].createdAt).toISOString().split('T')[0])}\nBy Anonymous`;
+                            commentContent = `${getAnswers[i].text}\n\nBy Anonymous`;
                         } else {
-                            commentContent = `${getAnswers[i].text}\n\nAt:${makeParsable(new Date(getAnswers[i].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[i].displayName}](tg://user?id=${getAnswers[i].fromUserId})`;
+                            commentContent = `${getAnswers[i].text}\n\nBy [${getAnswers[i].displayName}](tg://user?id=${getAnswers[i].fromUserId})`;
                         }
+                    } else if (getAnswers[i].objectType == "photo") {
+                        if (getAnswers[i].isAnon) {
+                            commentContent = `${getAnswers[i].caption}\n\nBy Anonymous`;
+                        } else {
+                            commentContent = `${getAnswers[i].caption}\n\nBy [${getAnswers[i].displayName}](tg://user?id=${getAnswers[i].fromUserId})`;
+                        }
+                        fileId = getAnswers[i].text;
                     } else {
                         if (getAnswers[i].isAnon) {
                             commentContent = `By Anonymous`;
                         } else {
                             commentContent = `By [${getAnswers[i].displayName}](tg://user?id=${getAnswers[i].fromUserId})`;
                         }
-                        
+
                         fileId = getAnswers[i].text;
                     }
 
@@ -133,6 +160,23 @@ bot.start(async (ctx) => {
                         await ctx.reply(
                             commentContent,
                             {
+                                parse_mode: "MarkdownV2",
+                                reply_markup: {
+                                    inline_keyboard: [
+                                        [
+                                            { text: `(${getAnswers[i].likes}) 👍`, callback_data: `thumbsup-${getAnswers[i].id}` },
+                                            { text: `(${getAnswers[i].deslikes}) 👎`, callback_data: `thumbsdown-${getAnswers[i].id}` },
+                                            { text: `(${getAnswers[i].doubt}) 🤔`, callback_data: `doubt-${getAnswers[i].id}` }
+                                        ]
+                                    ]
+                                }
+                            }
+                        );
+                    } else if (getAnswers[i].objectType == "photo") {
+                        await ctx.replyWithPhoto(
+                            fileId,
+                            {
+                                caption: commentContent,
                                 parse_mode: "MarkdownV2",
                                 reply_markup: {
                                     inline_keyboard: [
@@ -171,9 +215,15 @@ bot.start(async (ctx) => {
 
                     if (getAnswers[j].objectType == "text") {
                         if (getAnswers[j].isAnon) {
-                            commentContent = `${getAnswers[j].text}\n\nAt:${makeParsable(new Date(getAnswers[j].createdAt).toISOString().split('T')[0])}\nBy Anonymous`;
+                            commentContent = `${getAnswers[j].text}\n\nBy Anonymous`;
                         } else {
-                            commentContent = `${getAnswers[j].text}\n\nAt:${makeParsable(new Date(getAnswers[j].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})`;
+                            commentContent = `${getAnswers[j].text}\n\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})`;
+                        }
+                    } else if (getAnswers[j].objectType == "photo") {
+                        if (getAnswers[j].isAnon) {
+                            commentContent = `${getAnswers[j].caption}\n\nBy Anonymous`;
+                        } else {
+                            commentContent = `${getAnswers[j].caption}\n\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})`;
                         }
                     } else {
                         if (getAnswers[j].isAnon) {
@@ -197,6 +247,26 @@ bot.start(async (ctx) => {
                                             [
                                                 { text: `(${getAnswers[j].likes}) 👍`, callback_data: `thumbsup-${getAnswers[j].id}` },
                                                 { text: `(${getAnswers[j].deslikes}) 👎`, callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                                { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
+                                            ],
+                                            [
+                                                { text: "Load More", callback_data: `loadMoreComment-${getAnswers[j].questionId}-${ctx.session.commentIndex}` }
+                                            ]
+                                        ]
+                                    }
+                                }
+                            );
+                        } else if (getAnswers[j].objectType == "photo") {
+                            await ctx.replyWithVoice(
+                                fileId,
+                                {
+                                    caption: commentContent,
+                                    parse_mode: "MarkdownV2",
+                                    reply_markup: {
+                                        inline_keyboard: [
+                                            [
+                                                { text: `(${getAnswers[j].likes}) 👍`, callback_data: `thumbsup-${getAnswers[j].id}` },
+                                                { text: `(${getAnswers[j].deslikes})👎`, callback_data: `thumbsdown-${getAnswers[j].id}` },
                                                 { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
                                             ],
                                             [
@@ -244,6 +314,23 @@ bot.start(async (ctx) => {
                                     }
                                 }
                             );
+                        } else if (getAnswers[j].objectType == "photo") {
+                            await ctx.replyWithPhoto(
+                                fileId,
+                                {
+                                    caption: commentContent,
+                                    parse_mode: "MarkdownV2",
+                                    reply_markup: {
+                                        inline_keyboard: [
+                                            [
+                                                { text: `(${getAnswers[j].likes}) 👍`, callback_data: `thumbsup-${getAnswers[j].id}` },
+                                                { text: `(${getAnswers[j].deslikes}) 👎`, callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                                { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
+                                            ]
+                                        ]
+                                    }
+                                }
+                            );
                         } else {
                             await ctx.replyWithVoice(
                                 fileId,
@@ -270,12 +357,20 @@ bot.start(async (ctx) => {
         } else if (ctx.startPayload.includes("addanswer")) {
             console.log("add answers...");
             const questionId = parseInt(ctx.startPayload.split("__")[1]);
-
             ctx.session.chatId = ctx.chat.id;
             ctx.session.commentQuestionId = questionId;
-            ctx.session.isUserAddingComment = true;
 
-            return await ctx.reply("send your answer as a voice or text.");
+
+            return await ctx.reply("Do you want to stay anonymus?", {
+                reply_markup: {
+                    inline_keyboard: [
+                        [{ "text": "Yes", callback_data: "anonymus-commenter" }, { "text": "No", callback_data: "public-commenter" }]
+                    ]
+                }
+            });
+
+            //ctx.session.isUserAddingComment = true;
+            //return await ctx.reply("send your answer as a voice, photo or text.");
         }
     } else {
         console.log("there is no payload...");
@@ -367,6 +462,7 @@ bot.on(message('voice'), async (ctx) => {
                     questionMessageId: ctx.message.message_id,
                     displayName: ctx.message.from.first_name,
                     isAnon: ctx.session.isAnon,
+                    caption: '',
                     objectType: "voice"
                 }
             });
@@ -416,6 +512,7 @@ bot.on(message('voice'), async (ctx) => {
                     likes: 0,
                     deslikes: 0,
                     isAnon: ctx.session.isCommenterAnon,
+                    caption: "",
                     doubt: 0
                 }
             });
@@ -456,11 +553,10 @@ bot.on(message('voice'), async (ctx) => {
 });
 
 bot.on(message('photo'), async (ctx) => {
-
     if (ctx.session.isUserAsking) {
-        const fileId = ctx.message.voice.file_id;
+        const fileId = ctx.message.photo[0].file_id;
+        const cap = ctx.message.caption || "";
         ctx.session.isUserAsking = false;
-
         try {
             const newQuestion = await prisma.question.create({
                 data: {
@@ -472,7 +568,8 @@ bot.on(message('photo'), async (ctx) => {
                     questionMessageId: ctx.message.message_id,
                     displayName: ctx.message.from.first_name,
                     isAnon: ctx.session.isAnon,
-                    objectType: "voice"
+                    caption: cap,
+                    objectType: "photo"
                 }
             });
 
@@ -507,7 +604,8 @@ bot.on(message('photo'), async (ctx) => {
         }
     } else if (ctx.session.isUserAddingComment) {
         ctx.session.isUserAddingComment = false;
-        const fileId = ctx.message.voice.file_id;
+        const fileId = ctx.message.photo[0].file_id;
+        const cap = ctx.message.caption || "";
 
         try {
             await prisma.answer.create({
@@ -517,10 +615,11 @@ bot.on(message('photo'), async (ctx) => {
                     userId: ctx.message.from.id,
                     questionId: parseInt(ctx.session.commentQuestionId),
                     displayName: ctx.message.from.first_name,
-                    objectType: "voice",
+                    objectType: "photo",
                     likes: 0,
                     deslikes: 0,
                     isAnon: ctx.session.isCommenterAnon,
+                    caption: cap,
                     doubt: 0
                 }
             });
@@ -577,6 +676,7 @@ bot.on(message('text'), async (ctx) => {
                     questionMessageId: ctx.message.message_id,
                     displayName: ctx.message.from.first_name,
                     isAnon: ctx.session.isAnon,
+                    caption: '',
                     objectType: "text"
                 }
             });
@@ -585,7 +685,7 @@ bot.on(message('text'), async (ctx) => {
             let text;
 
             if (ctx.session.isAnon) {
-                text = `**Question ${newQuestion.id} By Anonymous\nat ${makeParsable(new Date(newQuestion.createdAt).toISOString().split('T')[0])}**`
+                text = `**Question ${newQuestion.id} By Anonymous**`
             } else {
                 text = `**Question ${newQuestion.id} By [${newQuestion.displayName}](tg://user?id=${newQuestion.fromUserId})**`
             }
@@ -668,16 +768,23 @@ bot.on(message('text'), async (ctx) => {
 
 bot.action("anonymus-poster", async (ctx) => {
     ctx.session.isAnon = true;
+    await ctx.editMessageReplyMarkup({
+        reply_markup: { remove_keyboard: true },
+    });
+
     await ctx.answerCbQuery("We respect your choice!");
     ctx.session.isUserAsking = true;
-    return await ctx.reply("Send me your question as voice or text, I will forward it to admins on behalf of you");
+    return await ctx.reply("Send me your question as voice, photo or text, I will forward it to admins on behalf of you");
 });
 
 bot.action("public-poster", async (ctx) => {
     ctx.session.isAnon = false;
+    await ctx.editMessageReplyMarkup({
+        reply_markup: { remove_keyboard: true },
+    });
     await ctx.answerCbQuery("We respect your choice!");
     ctx.session.isUserAsking = true;
-    return await ctx.reply("Send me your question as voice or text, I will forward it to admins on behalf of you");
+    return await ctx.reply("Send me your question as voice, photo or text, I will forward it to admins on behalf of you");
 });
 
 bot.action(/addComment-[0-9]+/, async (ctx) => {
@@ -686,8 +793,6 @@ bot.action(/addComment-[0-9]+/, async (ctx) => {
 
     ctx.session.chatId = ctx.chat.id;
     ctx.session.commentQuestionId = questionId;
-    //ctx.session.isUserAddingComment = true;
-    //return await ctx.reply("send your answer as a voice or text.");
     return await ctx.reply("Do you want to stay anonymus?", {
         reply_markup: {
             inline_keyboard: [
@@ -699,17 +804,22 @@ bot.action(/addComment-[0-9]+/, async (ctx) => {
 
 bot.action("anonymus-commenter", async (ctx) => {
     ctx.session.isCommenterAnon = true;
+    await ctx.editMessageReplyMarkup({
+        reply_markup: { remove_keyboard: true },
+    });
     await ctx.answerCbQuery("We respect your choice!");
     ctx.session.isUserAddingComment = true;
-    return await ctx.reply("Send me your Answer as voice or text");
+    return await ctx.reply("Send me your Answer as voice, photo or text");
 })
 
 bot.action("public-commenter", async (ctx) => {
     ctx.session.isCommenterAnon = false;
-    
+    await ctx.editMessageReplyMarkup({
+        reply_markup: { remove_keyboard: true },
+    });
     await ctx.answerCbQuery("We respect your choice!");
     ctx.session.isUserAddingComment = true;
-    return await ctx.reply("Send me your Answer as voice or text");
+    return await ctx.reply("Send me your Answer as voice, photo or text");
 });
 
 bot.action(/loadMoreComment-[0-9]+-[0-9]+/, async (ctx) => {
@@ -737,9 +847,9 @@ bot.action(/loadMoreComment-[0-9]+-[0-9]+/, async (ctx) => {
             for (let i = 0; i < getAnswers.length; i++) {
                 let commentContent;
                 if (getAnswers[i].isAnon) {
-                    commentContent = `${getAnswers[i].text}\n\nAt:${makeParsable(new Date(getAnswers[i].createdAt).toISOString().split('T')[0])}\nBy Anonymous`;
+                    commentContent = `${getAnswers[i].text}\n\nBy Anonymous`;
                 } else {
-                    commentContent = `${getAnswers[i].text}\n\nAt:${makeParsable(new Date(getAnswers[i].createdAt).toISOString().split('T')[0])}\nBy [${getAnswers[i].displayName}](tg://user?id=${getAnswers[i].fromUserId})`;
+                    commentContent = `${getAnswers[i].text}\n\nBy [${getAnswers[i].displayName}](tg://user?id=${getAnswers[i].fromUserId})`;
                 }
 
                 await ctx.reply(
@@ -764,9 +874,23 @@ bot.action(/loadMoreComment-[0-9]+-[0-9]+/, async (ctx) => {
                 let fileId;
 
                 if (getAnswers[j].objectType == "text") {
-                    commentContent = `${getAnswers[j].text}\n\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})`;
+                    if (getAnswers[j].isAnon) {
+                        commentContent = `${getAnswers[j].text}\n\nBy Anonymus`;
+                    } else {
+                        commentContent = `${getAnswers[j].text}\n\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})`;
+                    }
+                } else if (getAnswers[j].objectType == "photo") {
+                    if (getAnswers[j].isAnon) {
+                        commentContent = `${getAnswers[j].caption}\n\nBy Anonymus`;
+                    } else {
+                        commentContent = `${getAnswers[j].caption}\n\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})`;
+                    }
                 } else {
-                    commentContent = `By [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})`;
+                    if (getAnswers[j].isAnon) {
+                        commentContent = `By Anonymus`;
+                    } else {
+                        commentContent = `By [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})`;
+                    }
                     fileId = getAnswers[j].text;
                 }
 
@@ -777,6 +901,26 @@ bot.action(/loadMoreComment-[0-9]+-[0-9]+/, async (ctx) => {
                         await ctx.reply(
                             commentContent,
                             {
+                                parse_mode: "MarkdownV2",
+                                reply_markup: {
+                                    inline_keyboard: [
+                                        [
+                                            { text: `(${getAnswers[j].likes}) 👍`, callback_data: `thumbsup-${getAnswers[j].id}` },
+                                            { text: `(${getAnswers[j].deslikes}) 👎`, callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                            { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
+                                        ],
+                                        [
+                                            { text: "Load More", callback_data: `loadMoreComment-${getAnswers[j].questionId}-${ctx.session.commentIndex}` }
+                                        ]
+                                    ]
+                                }
+                            }
+                        );
+                    } else if (getAnswers[j].objectType == "photo") {
+                        await ctx.replyWithPhoto(
+                            fileId,
+                            {
+                                caption: commentContent,
                                 parse_mode: "MarkdownV2",
                                 reply_markup: {
                                     inline_keyboard: [
@@ -825,6 +969,26 @@ bot.action(/loadMoreComment-[0-9]+-[0-9]+/, async (ctx) => {
                                             { text: `(${getAnswers[j].likes}) 👍`, callback_data: `thumbsup-${getAnswers[j].id}` },
                                             { text: `(${getAnswers[j].deslikes}) 👎`, callback_data: `thumbsdown-${getAnswers[j].id}` },
                                             { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
+                                        ]
+                                    ]
+                                }
+                            }
+                        );
+                    } else if (getAnswers[j].objectType == "photo") {
+                        await ctx.replyWithPhoto(
+                            fileId,
+                            {
+                                caption: commentContent,
+                                parse_mode: "MarkdownV2",
+                                reply_markup: {
+                                    inline_keyboard: [
+                                        [
+                                            { text: `(${getAnswers[j].likes}) 👍`, callback_data: `thumbsup-${getAnswers[j].id}` },
+                                            { text: `(${getAnswers[j].deslikes}) 👎`, callback_data: `thumbsdown-${getAnswers[j].id}` },
+                                            { text: `(${getAnswers[j].doubt}) 🤔`, callback_data: `doubt-${getAnswers[j].id}` }
+                                        ],
+                                        [
+                                            { text: "Load More", callback_data: `loadMoreComment-${getAnswers[j].questionId}-${ctx.session.commentIndex}` }
                                         ]
                                     ]
                                 }
@@ -921,6 +1085,27 @@ bot.action(/thumbsup-[0-9]+/, async (ctx) => {
                     }
                 }
             );
+        } else if (updateComment.objectType == "photo") {
+            if (updateComment.isAnon) {
+                commentContent = `${updateComment.caption}\n\nBy Anonymous`;
+            } else {
+                commentContent = `${updateComment.caption}\n\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})`;
+            }
+            await ctx.editMessageCaption(
+                commentContent,
+                {
+                    parse_mode: "MarkdownV2",
+                    reply_markup: {
+                        inline_keyboard: [
+                            [
+                                { text: `(${updateComment.likes}) 👍`, callback_data: `thumbsup-${updateComment.id}` },
+                                { text: `(${updateComment.deslikes}) 👎`, callback_data: `thumbsdown-${updateComment.id}` },
+                                { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
+                            ]
+                        ]
+                    }
+                }
+            );
         } else {
             if (updateComment.isAnon) {
                 commentContent = `\nBy Anonymous`;
@@ -996,11 +1181,32 @@ bot.action(/thumbsdown-[0-9]+/, async (ctx) => {
 
             if (updateComment.objectType == "text") {
                 if (updateComment.isAnon) {
-                    commentContent = `${updateComment.text}\n\nAt:${makeParsable(new Date(updateComment.createdAt).toISOString().split('T')[0])}\nBy Anonymous`;
+                    commentContent = `${updateComment.text}\n\nBy Anonymous`;
                 } else {
-                    commentContent = `${updateComment.text}\n\nAt:${makeParsable(new Date(updateComment.createdAt).toISOString().split('T')[0])}\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})`;
+                    commentContent = `${updateComment.text}\n\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})`;
                 }
                 await ctx.editMessageText(
+                    commentContent,
+                    {
+                        parse_mode: "MarkdownV2",
+                        reply_markup: {
+                            inline_keyboard: [
+                                [
+                                    { text: `(${updateComment.likes}) 👍`, callback_data: `thumbsup-${updateComment.id}` },
+                                    { text: `(${updateComment.deslikes}) 👎`, callback_data: `thumbsdown-${updateComment.id}` },
+                                    { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
+                                ]
+                            ]
+                        }
+                    }
+                );
+            } else if (updateComment.objectType == "photo") {
+                if (updateComment.isAnon) {
+                    commentContent = `${updateComment.caption}\n\nBy Anonymous`;
+                } else {
+                    commentContent = `${updateComment.caption}\n\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})`;
+                }
+                await ctx.editMessageCaption(
                     commentContent,
                     {
                         parse_mode: "MarkdownV2",
@@ -1130,7 +1336,7 @@ bot.action(/approvequestion-[0-9]+/, async (ctx) => {
     });
 
 
-    //send to channel after checking if the object is voice or text
+    //send to channel after checking if the object is voice, photo or text
     if (approvedquestion.objectType == "text") {
         let content;
 
@@ -1164,6 +1370,44 @@ bot.action(/approvequestion-[0-9]+/, async (ctx) => {
                 id: approvedquestion.id
             }
         })
+    } else if (approvedquestion.objectType == "photo") {
+        let content;
+
+        if (approvedquestion.isAnon) {
+            content = `${approvedquestion.caption}\n\n**By: Anonymous**`;
+        } else {
+            content = `${approvedquestion.caption}\n\n**By: [${approvedquestion.displayName}](tg://user?id=${approvedquestion.fromUserId})**`;
+        }
+
+        console.log(content);
+
+        let channelPost = await ctx.telegram.sendPhoto(
+            process.env.dest_chan,
+            approvedquestion.text,
+            {
+                parse_mode: "MarkdownV2",
+                caption: content,
+                reply_markup: {
+                    inline_keyboard: [
+                        [
+                            { text: `Browse Answers 💬 (${approvedquestion.answersCount})`, url: link, resize_keyboard: true },
+                            { text: `Answer ➕`, url: addanswerLink, resize_keyboard: true },
+                        ],
+                    ]
+                }
+            }
+        );
+
+        await prisma.question.update({
+            data: {
+                questionMessageId: channelPost.message_id,
+                questionChatId: channelPost.chat.id
+            },
+            where: {
+                id: approvedquestion.id
+            }
+        })
+
     } else {
         let content;
 

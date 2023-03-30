@@ -8,7 +8,7 @@
         "chatId": 5395438361,
         "isUserAsking": false,
         "isUserAddingComment": false,
-        "commentQuestionId": "5",
+        "commentQuestionId": 7,
         "commentIndex": 0,
         "isAnon": false,
         "isCommenterAnon": true
@@ -25,6 +25,20 @@
         "commentQuestionId": -1,
         "commentIndex": 0,
         "isAnon": false,
+        "isCommenterAnon": false
+      }
+    },
+    {
+      "id": "652915092:652915092",
+      "data": {
+        "userid": 652915092,
+        "name": "<E></>",
+        "chatId": 652915092,
+        "isUserAsking": false,
+        "isUserAddingComment": false,
+        "commentQuestionId": -1,
+        "commentIndex": 0,
+        "isAnon": true,
         "isCommenterAnon": false
       }
     }

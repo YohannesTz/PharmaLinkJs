@@ -45,6 +45,7 @@ model Question {
   displayName       String
   objectType        String
   isAnon            Boolean
+  caption           String
   createdAt         DateTime @default(now())
 }
 
