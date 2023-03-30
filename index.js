@@ -17,15 +17,21 @@ const adminGroup = process.env.admin_group;
 
 
 const welcomeText = `
-Hi welcome to PharmLink. a bot that allows you to ask questions with your
-community. also join if you didn't already https://t.me/testchannelicreated
+Welcome!  to Pharmlink bot. A bot for asking and answering pharmacy related concerns, question and so much more! Lets support each other and grow together. 
+
+If you haven't joined the channel, please do also join @pharmlink
 /start - to restart the bot
 /ask - to ask a new question
 /about - about the makers`;
 
+const aboutText = `
+The development of this bot was led by EPSA- Standing Committee of Pharmaceutical Education to ease the communication between aspiring and current pharmacy students across the nation. It also aims to connect pharmacy professionals in different sector with current students. 
+
+The bot was developed in collaboration with @yohan_nes @In_contrast and @Itachiinthesky.`;
+
 bot.start(async (ctx) => {
 
-    //store state in session for user
+    //store state in session for the current user
     ctx.session = {
         userid: ctx.from.id, //current userId
         name: ctx.from.first_name, //displayName
@@ -418,18 +424,13 @@ bot.start(async (ctx) => {
 });
 
 
-// Handle button clicks
-bot.hears('ask', async (ctx) => {
-    return await ctx.reply('You clicked Button 1')
-})
-
-bot.hears('help', async (ctx) => {
-    return await ctx.reply('You clicked Button 2')
-})
-
 bot.on('inline_query', async (ctx) => {
     console.log(ctx);
     return await ctx.reply('sdfsdf');
+});
+
+bot.command("about", async (ctx) => {
+    return await ctx.reply(aboutText);
 });
 
 bot.command("ask", async (ctx) => {
@@ -1068,7 +1069,7 @@ bot.action(/thumbsup-[0-9]+/, async (ctx) => {
             if (updateComment.isAnon) {
                 commentContent = `${updateComment.text}\n\nBy Anonymous`;
             } else {
-                commentContent = `\nBy [${getAnswers[j].displayName}](tg://user?id=${getAnswers[j].fromUserId})\n`;
+                commentContent = `\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})\n`;
             }
             await ctx.editMessageText(
                 commentContent,
@@ -1149,101 +1150,102 @@ bot.action(/thumbsdown-[0-9]+/, async (ctx) => {
     });
 
     if (checkAction <= 0) {
-        const comment = await prisma.answer.findFirst({
+        /* const comment = await prisma.answer.findFirst({
             where: {
                 id: parseInt(commentId),
             }
+        }); */
+
+        //removed at the request of Niwedis.
+        //if (comment.likes >= 1) {
+        const updateComment = await prisma.answer.update({
+            where: {
+                id: parseInt(commentId)
+            },
+            data: {
+                deslikes: {
+                    increment: 1
+                }
+            }
         });
 
-        if (comment.likes >= 1) {
-            const updateComment = await prisma.answer.update({
-                where: {
-                    id: parseInt(commentId)
-                },
-                data: {
-                    deslikes: {
-                        increment: 1
-                    }
-                }
-            });
-
-            const insertAction = await prisma.action.create({
-                data: {
-                    answerId: parseInt(commentId),
-                    userId: parseInt(actionUserId),
-                    actionType: "like"
-                }
-            });
-
-            console.log(insertAction);
-
-            let commentContent;
-
-            if (updateComment.objectType == "text") {
-                if (updateComment.isAnon) {
-                    commentContent = `${updateComment.text}\n\nBy Anonymous`;
-                } else {
-                    commentContent = `${updateComment.text}\n\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})`;
-                }
-                await ctx.editMessageText(
-                    commentContent,
-                    {
-                        parse_mode: "MarkdownV2",
-                        reply_markup: {
-                            inline_keyboard: [
-                                [
-                                    { text: `(${updateComment.likes}) 👍`, callback_data: `thumbsup-${updateComment.id}` },
-                                    { text: `(${updateComment.deslikes}) 👎`, callback_data: `thumbsdown-${updateComment.id}` },
-                                    { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
-                                ]
-                            ]
-                        }
-                    }
-                );
-            } else if (updateComment.objectType == "photo") {
-                if (updateComment.isAnon) {
-                    commentContent = `${updateComment.caption}\n\nBy Anonymous`;
-                } else {
-                    commentContent = `${updateComment.caption}\n\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})`;
-                }
-                await ctx.editMessageCaption(
-                    commentContent,
-                    {
-                        parse_mode: "MarkdownV2",
-                        reply_markup: {
-                            inline_keyboard: [
-                                [
-                                    { text: `(${updateComment.likes}) 👍`, callback_data: `thumbsup-${updateComment.id}` },
-                                    { text: `(${updateComment.deslikes}) 👎`, callback_data: `thumbsdown-${updateComment.id}` },
-                                    { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
-                                ]
-                            ]
-                        }
-                    }
-                );
-            } else {
-                if (updateComment.isAnon) {
-                    commentContent = `\nBy Anonymous`;
-                } else {
-                    commentContent = `\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})`;
-                }
-                await ctx.editMessageCaption(
-                    commentContent,
-                    {
-                        parse_mode: "MarkdownV2",
-                        reply_markup: {
-                            inline_keyboard: [
-                                [
-                                    { text: `(${updateComment.likes}) 👍`, callback_data: `thumbsup-${updateComment.id}` },
-                                    { text: `(${updateComment.deslikes}) 👎`, callback_data: `thumbsdown-${updateComment.id}` },
-                                    { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
-                                ]
-                            ]
-                        }
-                    }
-                );
+        const insertAction = await prisma.action.create({
+            data: {
+                answerId: parseInt(commentId),
+                userId: parseInt(actionUserId),
+                actionType: "like"
             }
+        });
+
+        console.log(insertAction);
+
+        let commentContent;
+
+        if (updateComment.objectType == "text") {
+            if (updateComment.isAnon) {
+                commentContent = `${updateComment.text}\n\nBy Anonymous`;
+            } else {
+                commentContent = `${updateComment.text}\n\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})`;
+            }
+            await ctx.editMessageText(
+                commentContent,
+                {
+                    parse_mode: "MarkdownV2",
+                    reply_markup: {
+                        inline_keyboard: [
+                            [
+                                { text: `(${updateComment.likes}) 👍`, callback_data: `thumbsup-${updateComment.id}` },
+                                { text: `(${updateComment.deslikes}) 👎`, callback_data: `thumbsdown-${updateComment.id}` },
+                                { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
+                            ]
+                        ]
+                    }
+                }
+            );
+        } else if (updateComment.objectType == "photo") {
+            if (updateComment.isAnon) {
+                commentContent = `${updateComment.caption}\n\nBy Anonymous`;
+            } else {
+                commentContent = `${updateComment.caption}\n\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})`;
+            }
+            await ctx.editMessageCaption(
+                commentContent,
+                {
+                    parse_mode: "MarkdownV2",
+                    reply_markup: {
+                        inline_keyboard: [
+                            [
+                                { text: `(${updateComment.likes}) 👍`, callback_data: `thumbsup-${updateComment.id}` },
+                                { text: `(${updateComment.deslikes}) 👎`, callback_data: `thumbsdown-${updateComment.id}` },
+                                { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
+                            ]
+                        ]
+                    }
+                }
+            );
+        } else {
+            if (updateComment.isAnon) {
+                commentContent = `\nBy Anonymous`;
+            } else {
+                commentContent = `\nBy [${updateComment.displayName}](tg://user?id=${updateComment.fromUserId})`;
+            }
+            await ctx.editMessageCaption(
+                commentContent,
+                {
+                    parse_mode: "MarkdownV2",
+                    reply_markup: {
+                        inline_keyboard: [
+                            [
+                                { text: `(${updateComment.likes}) 👍`, callback_data: `thumbsup-${updateComment.id}` },
+                                { text: `(${updateComment.deslikes}) 👎`, callback_data: `thumbsdown-${updateComment.id}` },
+                                { text: `(${updateComment.doubt}) 🤔`, callback_data: `doubt-${updateComment.id}` }
+                            ]
+                        ]
+                    }
+                }
+            );
         }
+        //}
     } else {
         return await ctx.answerCbQuery("Thanks for the feedback but you have done this before!");
     }
@@ -1493,6 +1495,13 @@ bot.action(/declinequestion-[0-9]+/, async (ctx) => {
 
 bot.launch();
 
+/**
+ * appends scape charactrs to all special and reserved characters
+ * from a given string.
+ * 
+ * @param {String} text | a string with special characters.
+ * @returns {String}
+ */
 function makeParsable(text) {
     return text
         .replace(/\_/g, '\\_')

@@ -8,10 +8,10 @@
         "chatId": 5395438361,
         "isUserAsking": false,
         "isUserAddingComment": false,
-        "commentQuestionId": 7,
+        "commentQuestionId": -1,
         "commentIndex": 0,
         "isAnon": false,
-        "isCommenterAnon": true
+        "isCommenterAnon": false
       }
     },
     {
@@ -39,6 +39,20 @@
         "commentQuestionId": -1,
         "commentIndex": 0,
         "isAnon": true,
+        "isCommenterAnon": false
+      }
+    },
+    {
+      "id": "5482172843:5482172843",
+      "data": {
+        "userid": 5482172843,
+        "name": "Mek",
+        "chatId": 5482172843,
+        "isUserAsking": false,
+        "isUserAddingComment": false,
+        "commentQuestionId": "6",
+        "commentIndex": 0,
+        "isAnon": false,
         "isCommenterAnon": false
       }
     }
