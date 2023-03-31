@@ -1485,10 +1485,10 @@ bot.action(/declinequestion-[0-9]+/, async (ctx) => {
     //reply to group
     return ctx.reply("Question was declined 👍!");
 });
-
+// if hosted in vm. then you might need to put the http(s)://server-ip-address:port
 /* bot.launch({
     webhook: {
-        domain: "path/to/the/server/url",
+        domain: "path/to/the/server/url", 
         port: process.env.PORT
     }
 }); */
