@@ -12,16 +12,16 @@ datasource db {
 
 model Answer {
   id          Int      @id @default(autoincrement())
-  text        String
+  text        String   @db.VarChar(3000)
   fromUserId  BigInt
   userId      BigInt
   questionId  Int
-  displayName String
+  displayName String   @db.VarChar(3000)
   likes       Int
   deslikes    Int
   doubt       Int
-  caption     String
-  objectType  String
+  caption     String   @db.VarChar(3000)
+  objectType  String   @db.VarChar(3000)
   isAnon      Boolean
   createdAt   DateTime @default(now())
 }
@@ -30,29 +30,29 @@ model Action {
   id         Int      @id @default(autoincrement())
   answerId   BigInt
   userId     BigInt
-  actionType String
+  actionType String   @db.VarChar(3000)
   createdAt  DateTime @default(now())
 }
 
 model Question {
   id                Int      @id @default(autoincrement())
-  text              String
+  text              String   @db.VarChar(3000)
   isApproved        Boolean
   fromUserId        BigInt
   answersCount      Int
   questionChatId    BigInt
   questionMessageId BigInt
-  displayName       String
-  objectType        String
+  displayName       String   @db.VarChar(3000)
+  objectType        String   @db.VarChar(3000)
   isAnon            Boolean
-  caption           String
+  caption           String   @db.VarChar(3000)
   createdAt         DateTime @default(now())
 }
 
 model User {
   id        Int      @id @default(autoincrement())
   chatId    BigInt
-  firstName String
+  firstName String   @db.VarChar(3000)
   rating    Float
   userId    BigInt
   joinedAt  DateTime @default(now())
