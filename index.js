@@ -556,7 +556,7 @@ bot.on(message('voice'), async (ctx) => {
 bot.on(message('photo'), async (ctx) => {
     if (ctx.session.isUserAsking) {
         const fileId = ctx.message.photo[0].file_id;
-        const cap = ctx.message.caption || "";
+        const cap = makeParsable(ctx.message.caption) || "";
         ctx.session.isUserAsking = false;
         try {
             const newQuestion = await prisma.question.create({
@@ -606,7 +606,7 @@ bot.on(message('photo'), async (ctx) => {
     } else if (ctx.session.isUserAddingComment) {
         ctx.session.isUserAddingComment = false;
         const fileId = ctx.message.photo[0].file_id;
-        const cap = ctx.message.caption || "";
+        const cap = makeParsable(ctx.message.caption) || "";
 
         try {
             await prisma.answer.create({
@@ -666,103 +666,113 @@ bot.on(message('text'), async (ctx) => {
         ctx.session.isUserAsking = false;
 
         const question_text = makeParsable(ctx.message.text);
-        try {
-            const newQuestion = await prisma.question.create({
-                data: {
-                    text: question_text,
-                    isApproved: false,
-                    fromUserId: ctx.message.from.id,
-                    answersCount: 0,
-                    questionChatId: ctx.session.chatId,
-                    questionMessageId: ctx.message.message_id,
-                    displayName: ctx.message.from.first_name,
-                    isAnon: ctx.session.isAnon,
-                    caption: '',
-                    objectType: "text"
-                }
-            });
-
-            console.log(newQuestion);
-            let text;
-
-            if (ctx.session.isAnon) {
-                text = `**Question ${newQuestion.id} By Anonymous**`
-            } else {
-                text = `**Question ${newQuestion.id} By [${newQuestion.displayName}](tg://user?id=${newQuestion.fromUserId})**`
-            }
-
-            await ctx.forwardMessage(adminGroup, newQuestion.questionMessageId);
-            await ctx.telegram.sendMessage(
-                adminGroup,
-                text,
-                {
-                    parse_mode: "MarkdownV2",
-                    reply_markup: {
-                        inline_keyboard: [
-                            [{ text: "Approve", callback_data: `approvequestion-${newQuestion.id}` }, { text: "Decline", callback_data: `declinequestion-${newQuestion.id}` }],
-                        ]
+        console.log("Length: " + question_text.length);
+        
+        if (question_text.length <=3000) {
+            try {
+                const newQuestion = await prisma.question.create({
+                    data: {
+                        text: question_text,
+                        isApproved: false,
+                        fromUserId: ctx.message.from.id,
+                        answersCount: 0,
+                        questionChatId: ctx.session.chatId,
+                        questionMessageId: ctx.message.message_id,
+                        displayName: ctx.message.from.first_name,
+                        isAnon: ctx.session.isAnon,
+                        caption: '',
+                        objectType: "text"
                     }
+                });
+    
+                console.log(newQuestion);
+                let text;
+    
+                if (ctx.session.isAnon) {
+                    text = `**Question ${newQuestion.id} By Anonymous**`
+                } else {
+                    text = `**Question ${newQuestion.id} By [${newQuestion.displayName}](tg://user?id=${newQuestion.fromUserId})**`
                 }
-            )
-
-            return await ctx.sendMessage("Your question has been sent for review! You will be notified when it is approved or rejected.");
-        } catch (error) {
-            console.log(error);
-            return await ctx.reply("Something was wrong!");
+    
+                await ctx.forwardMessage(adminGroup, newQuestion.questionMessageId);
+                await ctx.telegram.sendMessage(
+                    adminGroup,
+                    text,
+                    {
+                        parse_mode: "MarkdownV2",
+                        reply_markup: {
+                            inline_keyboard: [
+                                [{ text: "Approve", callback_data: `approvequestion-${newQuestion.id}` }, { text: "Decline", callback_data: `declinequestion-${newQuestion.id}` }],
+                            ]
+                        }
+                    }
+                )
+    
+                return await ctx.sendMessage("Your question has been sent for review! You will be notified when it is approved or rejected.");
+            } catch (error) {
+                console.log(error);
+                return await ctx.reply("Something was wrong!");
+            }
+        } else {
+            return await ctx.reply("Please make sure your question is smaller than 3000 characters.");
         }
     } else if (ctx.session.isUserAddingComment) {
         ctx.session.isUserAddingComment = false;
+        const comment_text = makeParsable(ctx.message.text);
 
-        try {
-            const comment_text = makeParsable(ctx.message.text);
+        if (comment_text.length <=3000) {
+            try {
 
-            await prisma.answer.create({
-                data: {
-                    text: comment_text,
-                    fromUserId: ctx.message.from.id,
-                    userId: ctx.message.from.id,
-                    questionId: parseInt(ctx.session.commentQuestionId),
-                    displayName: ctx.message.from.first_name,
-                    objectType: "text",
-                    likes: 0,
-                    deslikes: 0,
-                    doubt: 0,
-                    isAnon: ctx.session.isCommenterAnon,
-                    caption: ""
-                }
-            });
-
-            const updateAnswerCount = await prisma.question.update({
-                where: {
-                    id: parseInt(ctx.session.commentQuestionId)
-                },
-                data: {
-                    answersCount: {
-                        increment: 1
+                await prisma.answer.create({
+                    data: {
+                        text: comment_text,
+                        fromUserId: ctx.message.from.id,
+                        userId: ctx.message.from.id,
+                        questionId: parseInt(ctx.session.commentQuestionId),
+                        displayName: ctx.message.from.first_name,
+                        objectType: "text",
+                        likes: 0,
+                        deslikes: 0,
+                        doubt: 0,
+                        isAnon: ctx.session.isCommenterAnon,
+                        caption: ""
                     }
-                }
-            });
-
-            console.log(updateAnswerCount);
-
-            //Update comment count
-            const link = `https://t.me/${process.env.username}?start=question__${updateAnswerCount.id}`
-            const addanswerLink = `https://t.me/${process.env.username}?start=addanswer__${updateAnswerCount.id}`
-            await ctx.telegram.editMessageReplyMarkup(
-                updateAnswerCount.questionChatId.toString(),
-                updateAnswerCount.questionMessageId.toString(),
-                undefined,
-                {
-                    inline_keyboard: [
-                        [{ text: `Browse Answers 💬 (${updateAnswerCount.answersCount})`, url: link, resize_keyboard: true }, { text: `Answer ➕`, url: addanswerLink, resize_keyboard: true },],
-                    ]
-                }
-            );
-
-            return ctx.reply("Success!");
-        } catch (error) {
-            console.log(error);
-            return ctx.reply("Oops! something was wrong!");
+                });
+    
+                const updateAnswerCount = await prisma.question.update({
+                    where: {
+                        id: parseInt(ctx.session.commentQuestionId)
+                    },
+                    data: {
+                        answersCount: {
+                            increment: 1
+                        }
+                    }
+                });
+    
+                console.log(updateAnswerCount);
+    
+                //Update comment count
+                const link = `https://t.me/${process.env.username}?start=question__${updateAnswerCount.id}`
+                const addanswerLink = `https://t.me/${process.env.username}?start=addanswer__${updateAnswerCount.id}`
+                await ctx.telegram.editMessageReplyMarkup(
+                    updateAnswerCount.questionChatId.toString(),
+                    updateAnswerCount.questionMessageId.toString(),
+                    undefined,
+                    {
+                        inline_keyboard: [
+                            [{ text: `Browse Answers 💬 (${updateAnswerCount.answersCount})`, url: link, resize_keyboard: true }, { text: `Answer ➕`, url: addanswerLink, resize_keyboard: true },],
+                        ]
+                    }
+                );
+    
+                return await ctx.reply("Success!");
+            } catch (error) {
+                console.log(error);
+                return await ctx.reply("Oops! something was wrong!");
+            }
+        } else {
+            return await ctx.reply("Please make sure your comment is under 3000 characters.");
         }
     }
 })
@@ -1496,7 +1506,7 @@ bot.action(/declinequestion-[0-9]+/, async (ctx) => {
 bot.launch();
 
 /**
- * appends scape charactrs to all special and reserved characters
+ * appends escape charactr to all special and reserved characters
  * from a given string.
  * 
  * @param {String} text | a string with special characters.

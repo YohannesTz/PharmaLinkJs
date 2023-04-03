@@ -8,10 +8,10 @@
         "chatId": 5395438361,
         "isUserAsking": false,
         "isUserAddingComment": false,
-        "commentQuestionId": -1,
+        "commentQuestionId": 22,
         "commentIndex": 0,
-        "isAnon": false,
-        "isCommenterAnon": false
+        "isAnon": true,
+        "isCommenterAnon": true
       }
     },
     {
@@ -24,7 +24,7 @@
         "isUserAddingComment": false,
         "commentQuestionId": -1,
         "commentIndex": 0,
-        "isAnon": false,
+        "isAnon": true,
         "isCommenterAnon": false
       }
     },
@@ -51,6 +51,20 @@
         "isUserAsking": false,
         "isUserAddingComment": false,
         "commentQuestionId": "6",
+        "commentIndex": 0,
+        "isAnon": false,
+        "isCommenterAnon": false
+      }
+    },
+    {
+      "id": "670616151:670616151",
+      "data": {
+        "userid": 670616151,
+        "name": "Kidan",
+        "chatId": 670616151,
+        "isUserAsking": false,
+        "isUserAddingComment": false,
+        "commentQuestionId": -1,
         "commentIndex": 0,
         "isAnon": false,
         "isCommenterAnon": false
