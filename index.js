@@ -34,7 +34,7 @@ bot.start(async (ctx) => {
     //store state in session for the current user
     ctx.session = {
         userid: ctx.from.id, //current userId
-        name: ctx.from.first_name, //displayName
+        name: makeParsable(ctx.from.first_name), //displayName
         chatId: ctx.chat.id, // current chat Id
         isUserAsking: false, // flag if user is asking
         isUserAddingComment: false, // flag if user is adding comment
@@ -401,7 +401,7 @@ bot.start(async (ctx) => {
         const newUser = await prisma.user.create({
             data: {
                 chatId: ctx.chat.id,
-                firstName: ctx.from.first_name,
+                firstName: makeParsable(ctx.from.first_name),
                 rating: 0.0,
                 userId: ctx.from.id,
             }
@@ -452,6 +452,8 @@ bot.on(message('voice'), async (ctx) => {
         const fileId = ctx.message.voice.file_id;
         ctx.session.isUserAsking = false;
 
+        const healthyDisplayName = makeParsable(ctx.message.from.first_name);
+
         try {
             const newQuestion = await prisma.question.create({
                 data: {
@@ -461,7 +463,7 @@ bot.on(message('voice'), async (ctx) => {
                     answersCount: 0,
                     questionChatId: ctx.session.chatId,
                     questionMessageId: ctx.message.message_id,
-                    displayName: ctx.message.from.first_name,
+                    displayName: healthyDisplayName,
                     isAnon: ctx.session.isAnon,
                     caption: '',
                     objectType: "voice"
@@ -501,6 +503,8 @@ bot.on(message('voice'), async (ctx) => {
         ctx.session.isUserAddingComment = false;
         const fileId = ctx.message.voice.file_id;
 
+        const healthyDisplayName = makeParsable(ctx.message.from.first_name);
+
         try {
             await prisma.answer.create({
                 data: {
@@ -508,7 +512,7 @@ bot.on(message('voice'), async (ctx) => {
                     fromUserId: ctx.message.from.id,
                     userId: ctx.message.from.id,
                     questionId: parseInt(ctx.session.commentQuestionId),
-                    displayName: ctx.message.from.first_name,
+                    displayName: healthyDisplayName,
                     objectType: "voice",
                     likes: 0,
                     deslikes: 0,
@@ -558,6 +562,9 @@ bot.on(message('photo'), async (ctx) => {
         const fileId = ctx.message.photo[0].file_id;
         const cap = makeParsable(ctx.message.caption) || "";
         ctx.session.isUserAsking = false;
+
+        const healthyDisplayName = makeParsable(ctx.message.from.first_name);
+
         try {
             const newQuestion = await prisma.question.create({
                 data: {
@@ -567,7 +574,7 @@ bot.on(message('photo'), async (ctx) => {
                     answersCount: 0,
                     questionChatId: ctx.session.chatId,
                     questionMessageId: ctx.message.message_id,
-                    displayName: ctx.message.from.first_name,
+                    displayName: healthyDisplayName,
                     isAnon: ctx.session.isAnon,
                     caption: cap,
                     objectType: "photo"
@@ -608,6 +615,8 @@ bot.on(message('photo'), async (ctx) => {
         const fileId = ctx.message.photo[0].file_id;
         const cap = makeParsable(ctx.message.caption) || "";
 
+        const healthyDisplayName = makeParsable(ctx.message.from.first_name);
+
         try {
             await prisma.answer.create({
                 data: {
@@ -615,7 +624,7 @@ bot.on(message('photo'), async (ctx) => {
                     fromUserId: ctx.message.from.id,
                     userId: ctx.message.from.id,
                     questionId: parseInt(ctx.session.commentQuestionId),
-                    displayName: ctx.message.from.first_name,
+                    displayName: healthyDisplayName,
                     objectType: "photo",
                     likes: 0,
                     deslikes: 0,
@@ -666,6 +675,8 @@ bot.on(message('text'), async (ctx) => {
         ctx.session.isUserAsking = false;
 
         const question_text = makeParsable(ctx.message.text);
+        //removing all uncessary special chars from username to. hence, healthyDisplayName.
+        const healthyDisplayName = makeParsable(ctx.message.from.first_name);
         console.log("Length: " + question_text.length);
         
         if (question_text.length <=3000) {
@@ -678,7 +689,7 @@ bot.on(message('text'), async (ctx) => {
                         answersCount: 0,
                         questionChatId: ctx.session.chatId,
                         questionMessageId: ctx.message.message_id,
-                        displayName: ctx.message.from.first_name,
+                        displayName: healthyDisplayName,
                         isAnon: ctx.session.isAnon,
                         caption: '',
                         objectType: "text"
@@ -719,6 +730,7 @@ bot.on(message('text'), async (ctx) => {
     } else if (ctx.session.isUserAddingComment) {
         ctx.session.isUserAddingComment = false;
         const comment_text = makeParsable(ctx.message.text);
+        const healthyDisplayName = makeParsable(ctx.message.from.first_name);
 
         if (comment_text.length <=3000) {
             try {
@@ -729,7 +741,7 @@ bot.on(message('text'), async (ctx) => {
                         fromUserId: ctx.message.from.id,
                         userId: ctx.message.from.id,
                         questionId: parseInt(ctx.session.commentQuestionId),
-                        displayName: ctx.message.from.first_name,
+                        displayName: healthyDisplayName,
                         objectType: "text",
                         likes: 0,
                         deslikes: 0,

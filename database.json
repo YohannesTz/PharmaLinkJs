@@ -8,10 +8,10 @@
         "chatId": 5395438361,
         "isUserAsking": false,
         "isUserAddingComment": false,
-        "commentQuestionId": 22,
+        "commentQuestionId": -1,
         "commentIndex": 0,
-        "isAnon": true,
-        "isCommenterAnon": true
+        "isAnon": false,
+        "isCommenterAnon": false
       }
     },
     {
@@ -62,6 +62,90 @@
         "userid": 670616151,
         "name": "Kidan",
         "chatId": 670616151,
+        "isUserAsking": false,
+        "isUserAddingComment": false,
+        "commentQuestionId": -1,
+        "commentIndex": 0,
+        "isAnon": false,
+        "isCommenterAnon": false
+      }
+    },
+    {
+      "id": "5392316993:5392316993",
+      "data": {
+        "userid": 5392316993,
+        "name": "Ayu",
+        "chatId": 5392316993,
+        "isUserAsking": false,
+        "isUserAddingComment": false,
+        "commentQuestionId": 38,
+        "commentIndex": 0,
+        "isAnon": false,
+        "isCommenterAnon": false
+      }
+    },
+    {
+      "id": "393916778:393916778",
+      "data": {
+        "userid": 393916778,
+        "name": "Abdulkarim",
+        "chatId": 393916778,
+        "isUserAsking": false,
+        "isUserAddingComment": false,
+        "commentQuestionId": 48,
+        "commentIndex": 0,
+        "isAnon": false,
+        "isCommenterAnon": false
+      }
+    },
+    {
+      "id": "473903976:473903976",
+      "data": {
+        "userid": 473903976,
+        "name": "##",
+        "chatId": 473903976,
+        "isUserAsking": false,
+        "isUserAddingComment": false,
+        "commentQuestionId": 53,
+        "commentIndex": 0,
+        "isAnon": false,
+        "isCommenterAnon": true
+      }
+    },
+    {
+      "id": "1657825278:1657825278",
+      "data": {
+        "userid": 1657825278,
+        "name": "!!!",
+        "chatId": 1657825278,
+        "isUserAsking": false,
+        "isUserAddingComment": true,
+        "commentQuestionId": 44,
+        "commentIndex": 0,
+        "isAnon": false,
+        "isCommenterAnon": false
+      }
+    },
+    {
+      "id": "5136484144:5136484144",
+      "data": {
+        "userid": 5136484144,
+        "name": "Frank (ishtien)",
+        "chatId": 5136484144,
+        "isUserAsking": false,
+        "isUserAddingComment": false,
+        "commentQuestionId": "53",
+        "commentIndex": 0,
+        "isAnon": false,
+        "isCommenterAnon": false
+      }
+    },
+    {
+      "id": "654844189:654844189",
+      "data": {
+        "userid": 654844189,
+        "name": "Error 404",
+        "chatId": 654844189,
         "isUserAsking": false,
         "isUserAddingComment": false,
         "commentQuestionId": -1,
