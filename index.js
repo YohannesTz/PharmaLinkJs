@@ -34,7 +34,7 @@ bot.start(async (ctx) => {
     //store state in session for the current user
     ctx.session = {
         userid: ctx.from.id, //current userId
-        name: makeParsable(ctx.from.first_name), //displayName
+        name: escapeMd(ctx.from.first_name), //displayName
         chatId: ctx.chat.id, // current chat Id
         isUserAsking: false, // flag if user is asking
         isUserAddingComment: false, // flag if user is adding comment
@@ -401,7 +401,7 @@ bot.start(async (ctx) => {
         const newUser = await prisma.user.create({
             data: {
                 chatId: ctx.chat.id,
-                firstName: makeParsable(ctx.from.first_name),
+                firstName: escapeMd(ctx.from.first_name),
                 rating: 0.0,
                 userId: ctx.from.id,
             }
@@ -452,7 +452,7 @@ bot.on(message('voice'), async (ctx) => {
         const fileId = ctx.message.voice.file_id;
         ctx.session.isUserAsking = false;
 
-        const healthyDisplayName = makeParsable(ctx.message.from.first_name);
+        const healthyDisplayName = escapeMd(ctx.message.from.first_name);
 
         try {
             const newQuestion = await prisma.question.create({
@@ -503,8 +503,8 @@ bot.on(message('voice'), async (ctx) => {
         ctx.session.isUserAddingComment = false;
         const fileId = ctx.message.voice.file_id;
 
-        const healthyDisplayName = makeParsable(ctx.message.from.first_name);
-
+        const healthyDisplayName = escapeMd(ctx.message.from.first_name);
+        console.log("507: " + healthyDisplayName);
         try {
             await prisma.answer.create({
                 data: {
@@ -560,10 +560,10 @@ bot.on(message('voice'), async (ctx) => {
 bot.on(message('photo'), async (ctx) => {
     if (ctx.session.isUserAsking) {
         const fileId = ctx.message.photo[0].file_id;
-        const cap = makeParsable(ctx.message.caption) || "";
+        const cap = escapeMd(ctx.message.caption) || "";
         ctx.session.isUserAsking = false;
 
-        const healthyDisplayName = makeParsable(ctx.message.from.first_name);
+        const healthyDisplayName = escapeMd(ctx.message.from.first_name);
 
         try {
             const newQuestion = await prisma.question.create({
@@ -613,9 +613,10 @@ bot.on(message('photo'), async (ctx) => {
     } else if (ctx.session.isUserAddingComment) {
         ctx.session.isUserAddingComment = false;
         const fileId = ctx.message.photo[0].file_id;
-        const cap = makeParsable(ctx.message.caption) || "";
+        const cap = escapeMd(ctx.message.caption) || "";
 
-        const healthyDisplayName = makeParsable(ctx.message.from.first_name);
+        const healthyDisplayName = escapeMd(ctx.message.from.first_name);
+        console.log("619: " + healthyDisplayName);
 
         try {
             await prisma.answer.create({
@@ -674,9 +675,9 @@ bot.on(message('text'), async (ctx) => {
     if (ctx.session.isUserAsking) {
         ctx.session.isUserAsking = false;
 
-        const question_text = makeParsable(ctx.message.text);
+        const question_text = escapeMd(ctx.message.text);
         //removing all uncessary special chars from username to. hence, healthyDisplayName.
-        const healthyDisplayName = makeParsable(ctx.message.from.first_name);
+        const healthyDisplayName = escapeMd(ctx.message.from.first_name);
         console.log("Length: " + question_text.length);
         
         if (question_text.length <=3000) {
@@ -729,8 +730,9 @@ bot.on(message('text'), async (ctx) => {
         }
     } else if (ctx.session.isUserAddingComment) {
         ctx.session.isUserAddingComment = false;
-        const comment_text = makeParsable(ctx.message.text);
-        const healthyDisplayName = makeParsable(ctx.message.from.first_name);
+        const comment_text = escapeMd(ctx.message.text);
+        const healthyDisplayName = escapeMd(ctx.message.from.first_name);
+        console.log("735: " + healthyDisplayName);
 
         if (comment_text.length <=3000) {
             try {
@@ -1518,6 +1520,19 @@ bot.action(/declinequestion-[0-9]+/, async (ctx) => {
 bot.launch();
 
 /**
+ * appends an escape character to all special and reserved characters 
+ * from a given string 
+ * 
+ * @param {String} text | a string with special characters
+ * @returns {String}
+ */
+
+function escapeMd(text) {
+    const chars = /[_*\[\]\(\)~`>#\+\-=|{}\.!]/g;
+    return text.replace(chars, '\\$&');
+}
+
+/**
  * appends escape charactr to all special and reserved characters
  * from a given string.
  * 
@@ -1526,24 +1541,24 @@ bot.launch();
  */
 function makeParsable(text) {
     return text
-        .replace(/\_/g, '\\_')
-        .replace(/\*/g, '\\*')
-        .replace(/\[/g, '\\[')
-        .replace(/\]/g, '\\]')
-        .replace(/\(/g, '\\(')
-        .replace(/\)/g, '\\)')
-        .replace(/\~/g, '\\~')
-        .replace(/\`/g, '\\`')
-        .replace(/\>/g, '\\>')
-        .replace(/\#/g, '\\#')
-        .replace(/\+/g, '\\+')
-        .replace(/\-/g, '\\-')
-        .replace(/\=/g, '\\=')
-        .replace(/\|/g, '\\|')
-        .replace(/\{/g, '\\{')
-        .replace(/\}/g, '\\}')
-        .replace(/\./g, '\\.')
-        .replace(/\!/g, '\\!')
+        .replace("/\_/g", "\\_")
+        .replace("/\*/g", "\\*")
+        .replace("/\[/g", "\\[")
+        .replace("/\]/g", "\\]")
+        .replace("/\(/g", "\\(")
+        .replace("/\)/g", "\\)")
+        .replace("/\~/g", "\\~")
+        .replace("/\`/g", "\\`")
+        .replace("/\>/g", "\\>")
+        .replace("/\#/g", "\\#")
+        .replace("/\+/g", "\\+")
+        .replace("/\-/g", "\\-")
+        .replace("/\=/g", "\\=")
+        .replace("/\|/g", "\\|")
+        .replace("/\{/g", "\\{")
+        .replace("/\}/g", "\\}")
+        .replace("/\./g", "\\.")
+        .replace("/\!/g", "\\!")
 }
 
 console.log("Bot started successfully!");
